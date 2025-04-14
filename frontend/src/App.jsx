@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
-import Login from './components/login';
+import Login from './components/loginPage';
 import{Routes, Route, BrowserRouter} from 'react-router-dom';
 function App() {
   const [count, setCount] = useState(0);
