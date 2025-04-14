@@ -7,6 +7,8 @@ import Typography from "@mui/material/Typography";
 import AUTH from "../Constant";
 import { useNavigate } from "react-router-dom";
 import Alert from '@mui/material/Alert';
+import { Modal } from 'antd';
+
 const Signup = (props) => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
@@ -16,7 +18,10 @@ const Signup = (props) => {
   const [error, setError] = useState("");
   const register = () => {
     if (password !== confirmPassword) {
-      alert("Passwords do not match.");
+      Modal.error({
+        title: 'Password Mismatch',
+        content: 'The passwords you entered do not match. Please double-check.',
+      });
       return;
     }
   
