@@ -6,13 +6,15 @@ import Button from '@mui/material/Button';
 import Typography from "@mui/material/Typography";
 import AUTH from "../Constant";
 import { useNavigate } from "react-router-dom";
-const Signup = () => {
+import Alert from '@mui/material/Alert';
+const Signup = (props) => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate()
-  const register = (props) => {
+  const [error, setError] = useState("");
+  const register = () => {
     if (password !== confirmPassword) {
       alert("Passwords do not match.");
       return;
@@ -30,22 +32,22 @@ const Signup = () => {
         name: username
       })
     })
-      .then((response) => response.json().then(data => ({ status: response.status, ok: response.ok, data })))
-      .then(({ status, ok, data }) => {
-        if (ok && data.token) {
+      .then(async (response) => {
+        const data = await response.json();
+        if (response.ok && data.token) {
           localStorage.setItem(AUTH.Token_key, data.token);
           console.log("Token saved successfully!");
-          props.setToken(data.token)
-          navigate("/")
+          props.setToken(data.token);
+          navigate("/");
         } else {
-          alert(data.error || `Registration failed with status ${status}.`);
+          setError(data.error || "Legendary Secret Key Registration Failed");
         }
       })
       .catch((error) => {
         console.error("Register error:", error);
-        alert("Network error.");
+        setError("Network error.");
       });
-  };
+  }
   
   return (
     <Container maxWidth="xs">
@@ -53,6 +55,9 @@ const Signup = () => {
         <Typography variant="h5" gutterBottom>
                     Welcome! Please signup to continue
         </Typography>
+        {error && (
+          <Alert severity="error">{error}</Alert>
+        )}
         <TextField
           required
           id="outlined-required"
