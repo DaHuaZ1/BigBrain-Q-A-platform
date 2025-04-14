@@ -16,7 +16,8 @@ const Signup = (props) => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const navigate = useNavigate()
   const [error, setError] = useState("");
-  const register = () => {
+  const register = (e) => {
+    e.preventDefault();
     if (password !== confirmPassword) {
       Modal.error({
         title: 'Password Mismatch',
@@ -56,7 +57,7 @@ const Signup = (props) => {
   
   return (
     <Container maxWidth="xs">
-      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <Box component="form" onSubmit={register} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <Typography variant="h5" gutterBottom>
                     Welcome! Please signup to continue
         </Typography>
@@ -79,16 +80,18 @@ const Signup = (props) => {
           required
           id="outlined-required"
           label="password"
+          type="password"
           onChange={(e) => setPassword(e.target.value)}
         />
         <TextField
           required
           id="outlined-required"
           label="confirm password"
+          type="password"
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        <Button variant="contained" onClick={register}>
-                    Signup Submit
+        <Button type="submit" variant="contained">
+            Signup Submit
         </Button>
       </Box>
     </Container>
