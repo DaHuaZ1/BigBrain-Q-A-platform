@@ -10,8 +10,8 @@ function App() {
     <BrowserRouter>
       <Bar token={token} setToken={setToken} />
       <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login setToken={setToken}/>} />
+        <Route path="/signup" element={<Signup setToken={setToken}/>} />
       </Routes>
 
     </BrowserRouter>

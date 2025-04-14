@@ -10,7 +10,7 @@ const Signup = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const register = () => {
+  const register = (props) => {
     if (password !== confirmPassword) {
       alert("Passwords do not match.");
       return;
@@ -33,6 +33,7 @@ const Signup = () => {
         if (ok && data.token) {
           localStorage.setItem(AUTH.Token_key, data.token);
           console.log("Token saved successfully!");
+          props.setToken(data.token)
         } else {
           alert(data.error || `Registration failed with status ${status}.`);
         }

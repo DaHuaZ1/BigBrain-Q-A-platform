@@ -5,7 +5,7 @@ import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Typography from "@mui/material/Typography";
 import AUTH from "../Constant";
-const Login = () => {
+const Login = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const signin = async () => {
@@ -24,6 +24,7 @@ const Login = () => {
     if (data.token) {
       localStorage.setItem(AUTH.Token_key, data.token)
       console.log("token saved")
+      props.setToken(data.token)
     }
   }
   return (

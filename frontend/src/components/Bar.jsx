@@ -4,8 +4,12 @@ import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
+import { Link } from 'react-router-dom';
 const Bar = (props) => {
-  const logout = () => {}
+  const logout = () => {
+    props.setToken(null);
+    localStorage.removeItem('token');
+  }
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -23,8 +27,8 @@ const Bar = (props) => {
           </Typography>
           {props.token === null
             ? <>
-              <Button color="inherit">Login</Button>
-              <Button color="inherit">Signup</Button>
+              <Button color="inherit" component={Link} to="/login">Login</Button>
+              <Button color="inherit" component={Link} to="/signup">Signup</Button>
             </>
             : <Button color="inherit" onClick={logout}>Logout</Button>
           }
