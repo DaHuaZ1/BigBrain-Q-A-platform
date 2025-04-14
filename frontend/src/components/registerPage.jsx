@@ -5,11 +5,13 @@ import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Typography from "@mui/material/Typography";
 import AUTH from "../Constant";
+import { useNavigate } from "react-router-dom";
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate = useNavigate()
   const register = (props) => {
     if (password !== confirmPassword) {
       alert("Passwords do not match.");
@@ -34,6 +36,7 @@ const Signup = () => {
           localStorage.setItem(AUTH.Token_key, data.token);
           console.log("Token saved successfully!");
           props.setToken(data.token)
+          navigate("/")
         } else {
           alert(data.error || `Registration failed with status ${status}.`);
         }

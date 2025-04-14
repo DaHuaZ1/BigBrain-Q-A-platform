@@ -5,9 +5,11 @@ import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Typography from "@mui/material/Typography";
 import AUTH from "../Constant";
+import { useNavigate } from "react-router-dom";
 const Login = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const navigate = useNavigate()
   const signin = async () => {
     const url = "http://localhost:5005/admin/auth/login"
     const response = await fetch(url, {
@@ -25,6 +27,7 @@ const Login = (props) => {
       localStorage.setItem(AUTH.Token_key, data.token)
       console.log("token saved")
       props.setToken(data.token)
+      navigate("/")
     }
   }
   return (
