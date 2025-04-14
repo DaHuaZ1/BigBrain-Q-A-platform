@@ -12,7 +12,8 @@ const Login = (props) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("")
   const navigate = useNavigate()
-  const signin = async () => {
+  const signin = async (e) => {
+    e.preventDefault(); 
     const url = "http://localhost:5005/admin/auth/login"
     const response = await fetch(url, {
       method: "POST",
@@ -36,7 +37,7 @@ const Login = (props) => {
   }
   return (
     <Container>
-      <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+      <Box component="form" onSubmit={signin} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
         <Typography variant="h5" gutterBottom>
                     Welcome! Please login to continue
         </Typography>
@@ -52,10 +53,11 @@ const Login = (props) => {
         <TextField
           required
           id="outlined-required"
+          type="password"
           label="password"
           onChange={(e) => setPassword(e.target.value)}
         />
-        <Button variant="contained" onClick={signin}>
+        <Button type="submit" variant="contained">
                     Login Submit
         </Button>
       </Box>
