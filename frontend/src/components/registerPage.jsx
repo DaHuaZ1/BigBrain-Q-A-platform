@@ -56,8 +56,30 @@ const Signup = (props) => {
   }
   
   return (
-    <Container maxWidth="xs">
-      <Box component="form" onSubmit={register} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <Container maxWidth="sm" sx={{
+      height: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      px: 2,
+      py: 4,
+    }}>
+      <Box
+        component="form"
+        onSubmit={register}
+        sx={{
+          width: '100%',
+          maxWidth: { xs: 360, sm: 500, md: 800 },
+          mx: 'auto',
+          p: { xs: 2, sm: 3 },
+          boxShadow: 3,
+          borderRadius: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          backgroundColor: 'background.paper',
+        }}
+      >
         <Typography variant="h5" gutterBottom>
                     Welcome! Please signup to continue
         </Typography>
