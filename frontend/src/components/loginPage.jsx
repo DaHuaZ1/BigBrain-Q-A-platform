@@ -36,8 +36,29 @@ const Login = (props) => {
     }
   }
   return (
-    <Container>
-      <Box component="form" onSubmit={signin} sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+    <Container maxWidth="sm" sx={{
+      height: '100vh',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}>
+      <Box
+        component="form"
+        onSubmit={signin}
+        sx={{
+          width: '100%',
+          maxWidth: { xs: 360, sm: 500, md: 800 },
+          mx: 'auto',
+          p: { xs: 2, sm: 3 },
+          boxShadow: 3,
+          borderRadius: 2,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          backgroundColor: 'background.paper',
+          minHeight: 'auto',
+        }}
+      >
         <Typography variant="h5" gutterBottom>
                     Welcome! Please login to continue
         </Typography>
@@ -46,16 +67,21 @@ const Login = (props) => {
         )}
         <TextField
           required
-          id="outlined-required"
-          label="email"
+          label="Email"
+          fullWidth
+          type="email"
+          value={email}
           onChange={(e) => setEmail(e.target.value)}
+          variant="outlined"
         />
         <TextField
           required
-          id="outlined-required"
+          label="Password"
           type="password"
-          label="password"
+          value={password}
           onChange={(e) => setPassword(e.target.value)}
+          fullWidth
+          variant="outlined"
         />
         <Button type="submit" variant="contained">
                     Login Submit
