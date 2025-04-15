@@ -41,10 +41,11 @@ const Signup = (props) => {
       .then(async (response) => {
         const data = await response.json();
         if (response.ok && data.token) {
+          localStorage.setItem(AUTH.USER_KEY, email)
           localStorage.setItem(AUTH.Token_key, data.token);
           console.log("Token saved successfully!");
           props.setToken(data.token);
-          navigate("/");
+          navigate("/dashboard");
         } else {
           setError(data.error || "Legendary Secret Key Registration Failed");
         }

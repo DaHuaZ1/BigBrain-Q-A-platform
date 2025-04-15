@@ -27,10 +27,11 @@ const Login = (props) => {
     })
     const data = await response.json()
     if (data.token) {
+      localStorage.setItem(AUTH.USER_KEY, email)
       localStorage.setItem(AUTH.Token_key, data.token)
       console.log("token saved")
       props.setToken(data.token)
-      navigate("/")
+      navigate("/dashboard")
     }else{
       setError(data.error || "Legendary Secret Key Login Failed")
     }
@@ -69,7 +70,7 @@ const Login = (props) => {
           required
           label="Email"
           fullWidth
-          type="email"
+          // type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           variant="outlined"
