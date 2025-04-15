@@ -9,6 +9,7 @@ const Bar = (props) => {
   const logout = () => {
     props.setToken(null);
     localStorage.removeItem('token');
+    localStorage.removeItem('email');
   }
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -30,7 +31,7 @@ const Bar = (props) => {
               <Button color="inherit" component={Link} to="/login">Login</Button>
               <Button color="inherit" component={Link} to="/signup">Signup</Button>
             </>
-            : <Button color="inherit" onClick={logout}>Logout</Button>
+            : <Button color="inherit" onClick={logout} component={Link} to={"/"} >Logout</Button>
           }
         </Toolbar>
       </AppBar>
