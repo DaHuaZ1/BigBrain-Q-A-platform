@@ -4,6 +4,8 @@ import Signup from './components/registerPage';
 import Bar from './components/Bar';
 import { useState } from 'react';
 import Home from './components/homePage';
+import Dashboard from './components/Dashboard';
+
 function App() {
   const[token, setToken]=useState(localStorage.getItem('token'));
   return (
@@ -14,6 +16,7 @@ function App() {
         <Route path="/" element={<Home token={token}/>} />
         <Route path="/login" element={<Login setToken={setToken}/>} />
         <Route path="/signup" element={<Signup setToken={setToken}/>} />
+        <Route path="/dashboard" element={<Dashboard />} />
       </Routes>
 
     </BrowserRouter>
