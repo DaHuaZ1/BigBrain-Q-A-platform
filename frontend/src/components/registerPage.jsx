@@ -90,6 +90,7 @@ const Signup = (props) => {
           required
           id="outlined-required"
           label="email"
+          type="email"
           onChange={(e) => setEmail(e.target.value)}
         />
         <TextField
