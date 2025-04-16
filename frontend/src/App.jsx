@@ -5,6 +5,7 @@ import Bar from './components/Bar';
 import { useState } from 'react';
 import Home from './components/homePage';
 import Dashboard from './components/Dashboard';
+import SingleGame from './components/singleGame';
 
 function App() {
   const[token, setToken]=useState(localStorage.getItem('token'));
@@ -17,6 +18,7 @@ function App() {
         <Route path="/login" element={<Login setToken={setToken}/>} />
         <Route path="/signup" element={<Signup setToken={setToken}/>} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/game/:game_id" element={<SingleGame />} />
       </Routes>
 
     </BrowserRouter>
