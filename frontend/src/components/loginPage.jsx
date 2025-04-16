@@ -9,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import Alert from '@mui/material/Alert';
 import { Modal } from 'antd';
 import { useEffect } from "react";
+import CanvasCaptcha from './CanvasCaptcha'; 
 
 const Login = (props) => {
   const [email, setEmail] = useState("");
@@ -108,6 +109,7 @@ const Login = (props) => {
           fullWidth
           variant="outlined"
         />
+        {/* Captcha */}
         <Box display="flex" alignItems="center" gap={2}>
           <TextField
             required
@@ -115,25 +117,8 @@ const Login = (props) => {
             value={inputCaptcha}
             onChange={(e) => setInputCaptcha(e.target.value)}
           />
-          <Box
-            sx={{
-              fontFamily: 'monospace',
-              fontSize: 24,
-              fontWeight: 'bold',
-              px: 2,
-              py: 1,
-              backgroundColor: '#f0f0f0',
-              letterSpacing: 2,
-              transform: 'rotate(-2deg)',
-              userSelect: 'none',
-              border: '1px dashed #aaa',
-              borderRadius: 1
-            }}
-          >
-            {captcha}
-          </Box>
+          <CanvasCaptcha text={captcha} />
         </Box>
-
         <Button type="submit" variant="contained">
                     Login Submit
         </Button>
