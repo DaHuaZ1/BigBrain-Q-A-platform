@@ -7,11 +7,27 @@ import Typography from "@mui/material/Typography";
 import AUTH from "../Constant";
 import { useNavigate } from "react-router-dom";
 import Alert from '@mui/material/Alert';
+import { Modal } from 'antd';
+import { useEffect } from "react";
+
 const Login = (props) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("")
+  const [captcha, setCaptcha] = useState("");
+  const [inputCaptcha, setInputCaptcha] = useState("");
   const navigate = useNavigate()
+  const generateCaptcha = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let result = "";
+    for (let i = 0; i < 4; i++) {
+      result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    setCaptcha(result);
+  };  
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
   const signin = async (e) => {
     e.preventDefault(); 
     const url = "http://localhost:5005/admin/auth/login"
@@ -25,6 +41,14 @@ const Login = (props) => {
         password
       })
     })
+    if (inputCaptcha.toUpperCase() !== captcha.toUpperCase()) {
+      Modal.error({
+        title: 'Invalid Captcha',
+        content: 'The captcha you entered is incorrect. Please try again.',
+      });
+      generateCaptcha();
+      return;
+    }
     const data = await response.json()
     if (data.token) {
       localStorage.setItem(AUTH.Token_key, data.token)
@@ -83,6 +107,32 @@ const Login = (props) => {
           fullWidth
           variant="outlined"
         />
+        <Box display="flex" alignItems="center" gap={2}>
+          <TextField
+            required
+            label="Captcha"
+            value={inputCaptcha}
+            onChange={(e) => setInputCaptcha(e.target.value)}
+          />
+          <Box
+            sx={{
+              fontFamily: 'monospace',
+              fontSize: 24,
+              fontWeight: 'bold',
+              px: 2,
+              py: 1,
+              backgroundColor: '#f0f0f0',
+              letterSpacing: 2,
+              transform: 'rotate(-2deg)',
+              userSelect: 'none',
+              border: '1px dashed #aaa',
+              borderRadius: 1
+            }}
+          >
+            {captcha}
+          </Box>
+        </Box>
+
         <Button type="submit" variant="contained">
                     Login Submit
         </Button>
