@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from '@mui/material/Button';
 import { Container, TextField } from "@mui/material";
 import Box from '@mui/material/Box';
@@ -8,6 +8,7 @@ import Fade from '@mui/material/Fade';
 import { fetchAllGames } from "../getAllGames";
 import { putNewGame } from "../putNewGame";
 import AUTH from "../Constant";
+import GameCard from "./gameCard";
 
 const style = {
     position: 'absolute',
@@ -26,12 +27,12 @@ const Dashboard = () => {
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
     const [title, setTitle] = useState("");
+    const [games, setGames] = useState([]);
 
     const postNewGame = () => {
         const owner = localStorage.getItem(AUTH.USER_KEY);
         fetchAllGames()
         .then((data) => {
-            console.log(data);
             const oldGame = Array.isArray(data.games) ? data.games : [];
             // create a new game object
             const newGame = {
@@ -48,8 +49,20 @@ const Dashboard = () => {
         .then((res)=> {
             handleClose();
             setTitle("");
+            getGames();
         })
     }
+
+    const getGames = () => {
+        fetchAllGames()
+        .then((data) => {
+            setGames(data.games);
+        })
+    }
+
+    useEffect(() => {
+        getGames();
+    }, [])
 
     return (
         <>
@@ -62,6 +75,8 @@ const Dashboard = () => {
             >
                 Create a new game
             </Button>
+            <GameCard games={games} />
+
             <Modal
                 aria-labelledby="transition-modal-title"
                 aria-describedby="transition-modal-description"
