@@ -26,7 +26,7 @@ const Dashboard = () => {
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-    const [title, setTitle] = useState("");
+    const [name, setName] = useState("");
     const [games, setGames] = useState([]);
 
     const postNewGame = () => {
@@ -37,7 +37,7 @@ const Dashboard = () => {
             // create a new game object
             const newGame = {
                 owner: owner,
-                title: title,
+                name: name,
                 thumbnail:"",
                 questions: [],
             };
@@ -48,7 +48,7 @@ const Dashboard = () => {
         })
         .then((res)=> {
             handleClose();
-            setTitle("");
+            setName("");
             getGames();
         })
     }
@@ -75,7 +75,7 @@ const Dashboard = () => {
             >
                 Create a new game
             </Button>
-            <GameCard games={games} />
+            <GameCard games={games} onDelete={getGames} />
 
             <Modal
                 aria-labelledby="transition-modal-title"
@@ -98,9 +98,9 @@ const Dashboard = () => {
                             }}
                             required
                             id="outlined-required"
-                            label="Game Title"
-                            onChange={(e) => setTitle(e.target.value)}
-                            value={title}
+                            label="Game Name"
+                            onChange={(e) => setName(e.target.value)}
+                            value={name}
                         />
                         <Button 
                             sx={{
@@ -119,7 +119,7 @@ const Dashboard = () => {
                             border: "2px solid #000000",
                             }} 
                             variant="contained" 
-                            onClick={() => postNewGame(title)}
+                            onClick={() => postNewGame(name)}
                         >
                             submit
                         </Button>
