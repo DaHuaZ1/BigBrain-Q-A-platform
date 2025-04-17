@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchAllGames } from "../getAllGames";
 import {
@@ -13,7 +13,12 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
+import Snackbar from "@mui/material/Snackbar";
+import MuiAlert from "@mui/material/Alert";
 
+const Alert = React.forwardRef(function Alert(props, ref) {
+  return <MuiAlert elevation={6} variant="filled" ref={ref} {...props} />;
+});
 
 const SingleQuestion = () => {
   const { game_id, question_id } = useParams();
@@ -25,6 +30,8 @@ const SingleQuestion = () => {
   const durationRef = useRef();
   const pointsRef = useRef();
   const [openResetDialog, setOpenResetDialog] = useState(false);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+
 
   useEffect(() => {
     fetchAllGames().then((data) => {
@@ -51,6 +58,7 @@ const SingleQuestion = () => {
       optionAnswers: ["", ""],
       correctAnswers: [],
     });
+    setSnackbar({ open: true, message: "Reset Form", severity: "info" });
   };  
 
   const saveQuestion = () => {
@@ -84,6 +92,7 @@ const SingleQuestion = () => {
         setGame(updatedGame);
         setQuestion(updatedQuestion);
         console.log("Question updated successfully");
+        setSnackbar({ open: true, message: "Question updated successfully", severity: "success" });
       })
       .catch((error) => console.error("Error updating question:", error));
   };
@@ -282,7 +291,20 @@ const SingleQuestion = () => {
             </Button>
           </DialogActions>
         </Dialog>
-
+        <Snackbar
+          open={snackbar.open}
+          autoHideDuration={3000}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        >
+          <Alert
+            onClose={() => setSnackbar({ ...snackbar, open: false })}
+            severity={snackbar.severity}
+            sx={{ width: "100%" }}
+          >
+            {snackbar.message}
+          </Alert>
+        </Snackbar>
       </Paper>
     </Container>
   );
