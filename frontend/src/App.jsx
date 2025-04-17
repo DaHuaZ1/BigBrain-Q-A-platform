@@ -7,6 +7,7 @@ import Home from './components/homePage';
 import Dashboard from './components/Dashboard';
 import SingleGame from './components/singleGame';
 import { SnackbarProvider } from 'notistack';
+import SingleQuestion from './components/singleQuestion';
 
 function App() {
   const[token, setToken]=useState(localStorage.getItem('token'));
@@ -21,6 +22,7 @@ function App() {
           <Route path="/signup" element={<Signup setToken={setToken}/>} />
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/game/:game_id" element={<SingleGame />} />
+          <Route path="/game/:game_id/question/:question_id" element={<SingleQuestion />} />
         </Routes>
 
       </BrowserRouter>
