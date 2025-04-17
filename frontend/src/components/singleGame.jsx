@@ -53,7 +53,7 @@ const SingleGame = () => {
             }
         })
         .catch((error) => console.error("Error fetching games:", error));
-    }, [game, questions]);
+    }, [game,questions]);
 
     const updateGame = () => {
         fetchAllGames()
@@ -114,12 +114,20 @@ const SingleGame = () => {
         return <div>Loading...</div>;
     }
 
-    const editQuestion = () => {
-        console.log("Edit question clicked");
-    }
-
-    const deleteQuestion = () => {
-        console.log("Delete question clicked");
+    const deleteQuestion = (questionId) => {
+        fetchAllGames()
+        .then((data) => {
+            const oldGame = data.games || [];
+            const updatedGame = oldGame.map((game) => {
+                if (game.id === parseInt(game_id)) {
+                    const updatedQuestions = game.questions.filter((question) => question.id !== questionId);
+                    return { ...game, questions: updatedQuestions };
+                }
+                return game;
+            });
+            return putNewGame(updatedGame);
+        })
+        .catch((error) => console.error("Error deleting question:", error));
     }
 
     return (
@@ -173,8 +181,8 @@ const SingleGame = () => {
                                 <Box sx={{ display:"flex", justifyContent:"space-between" , border: '1px solid #e0e0e0', borderRadius: 2, p: 2 }}>
                                     <Typography variant="body1">{question.question}</Typography>
                                     <Box sx={{ display: 'flex', gap: 1 }}>
-                                        <Button variant="contained" size="small" onClick={editQuestion}>Edit</Button>
-                                        <Button variant="contained" size="small" color="error" onClick={deleteQuestion}>Delete</Button>
+                                        <Button variant="contained" size="small" onClick={()=>navigate(`/game/${game.id}/question/${question.id}`)}>Edit</Button>
+                                        <Button variant="contained" size="small" color="error" onClick={()=>deleteQuestion(question.id)}>Delete</Button>
                                     </Box>
                                 </Box>
                             </React.Fragment>
