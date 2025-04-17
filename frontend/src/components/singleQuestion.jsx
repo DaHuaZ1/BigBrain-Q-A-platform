@@ -7,6 +7,12 @@ import {
 } from "@mui/material";
 import Delete from "@mui/icons-material/Delete";
 import { putNewGame } from "../putNewGame";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import Dialog from '@mui/material/Dialog';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
+import DialogContentText from '@mui/material/DialogContentText';
+import DialogTitle from '@mui/material/DialogTitle';
 
 
 const SingleQuestion = () => {
@@ -14,6 +20,11 @@ const SingleQuestion = () => {
   const [question, setQuestion] = useState(null);
   const [game, setGame] = useState(null);
   const navigate = useNavigate();
+  const questionRef = useRef();
+  const typeRef = useRef();
+  const durationRef = useRef();
+  const pointsRef = useRef();
+  const [openResetDialog, setOpenResetDialog] = useState(false);
 
   useEffect(() => {
     fetchAllGames().then((data) => {
@@ -29,7 +40,38 @@ const SingleQuestion = () => {
     });
   }, []);
 
+  const handleReset = () => {
+    setQuestion({
+      ...question,
+      question: "",
+      type: "",
+      duration: 0,
+      points: 0,
+      media: "",
+      optionAnswers: ["", ""],
+      correctAnswers: [],
+    });
+  };  
+
   const saveQuestion = () => {
+    // Validate required fields and auto-focus first invalid one
+    if (!question.question.trim()) {
+      questionRef.current.focus();
+      return;
+    }
+    if (!question.type) {
+      typeRef.current.focus();
+      return;
+    }
+    if (question.duration < 0 || isNaN(question.duration)) {
+      durationRef.current.focus();
+      return;
+    }
+    if (question.points < 0 || isNaN(question.points)) {
+      pointsRef.current.focus();
+      return;
+    }
+
     const updatedQuestion = {
       ...question,
       duration: Math.max(0, question.duration),
@@ -215,6 +257,32 @@ const SingleQuestion = () => {
             </Button>
           </Box>
         </Box>
+        <Dialog
+          open={openResetDialog}
+          onClose={() => setOpenResetDialog(false)}
+        >
+          <DialogTitle>Confirm Reset</DialogTitle>
+          <DialogContent>
+            <DialogContentText>
+              Are you sure you want to clear all question fields? This action cannot be undone.
+            </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenResetDialog(false)} color="primary">
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                handleReset();
+                setOpenResetDialog(false);
+              }}
+              color="error"
+            >
+              Confirm Reset
+            </Button>
+          </DialogActions>
+        </Dialog>
+
       </Paper>
     </Container>
   );
