@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import Button from '@mui/material/Button';
-import { Container, TextField } from "@mui/material";
+import { Container, TextField, Typography, Divider } from "@mui/material";
 import Box from '@mui/material/Box';
 import Modal from '@mui/material/Modal';
 import Backdrop from '@mui/material/Backdrop';
@@ -9,6 +9,7 @@ import { fetchAllGames } from "../getAllGames";
 import { putNewGame } from "../putNewGame";
 import AUTH from "../Constant";
 import GameCard from "./gameCard";
+import { useSnackbar } from "notistack";
 
 const style = {
     position: 'absolute',
@@ -20,7 +21,7 @@ const style = {
     border: '2px solid #000',
     boxShadow: 24,
     p: 4,
-  };
+};
 
 const Dashboard = () => {
     const [open, setOpen] = useState(false);
@@ -28,6 +29,7 @@ const Dashboard = () => {
     const handleClose = () => setOpen(false);
     const [name, setName] = useState("");
     const [games, setGames] = useState([]);
+    const { enqueueSnackbar } = useSnackbar();
 
     const postNewGame = () => {
         const owner = localStorage.getItem(AUTH.USER_KEY);
@@ -46,11 +48,16 @@ const Dashboard = () => {
             // update the game list in the database
             return putNewGame(newGameList);
         })
-        .then((res)=> {
+        .then(()=> {
             handleClose();
             setName("");
             getGames();
+            enqueueSnackbar("Game created successfully", { variant: "success" });
         })
+        .catch((error) => {
+            console.error("Error creating game:", error);
+            enqueueSnackbar("Failed to create game", { variant: "error" });
+        });
     }
 
     const getGames = () => {
@@ -65,17 +72,22 @@ const Dashboard = () => {
     }, [])
 
     return (
-        <>
-            <Button 
-                sx={{
-                    margin: "10px",
-                }} 
-                variant="contained"
-                onClick={handleOpen}    
-            >
-                Create a new game
-            </Button>
-            <GameCard games={games} onDelete={getGames} />
+        <Container maxWidth="lg" sx={{ mt: 4 }}>
+            <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+                <Typography variant="h4" fontWeight="bold">
+                    Dashboard
+                </Typography>
+                <Button
+                    variant="contained"
+                    onClick={handleOpen}
+                    sx={{ height: "40px", fontWeight: "bold" }}
+                >
+                    Create a New Game
+                </Button>
+            </Box>
+            <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 2, p: 2, mb: 4, backgroundColor: "#fafafa" }}>
+                <GameCard games={games} onDelete={getGames} onAddGameClick={handleOpen} />
+            </Box>
 
             <Modal
                 aria-labelledby="transition-modal-title"
@@ -85,17 +97,22 @@ const Dashboard = () => {
                 closeAfterTransition
                 slots={{ backdrop: Backdrop }}
                 slotProps={{
-                backdrop: {
-                    timeout: 500,
-                },
+                    backdrop: {
+                        timeout: 500,
+                    },
                 }}
             >
                 <Fade in={open}>
                     <Box sx={style}>
+                        <Typography variant="h6" gutterBottom sx={{ 
+                                textAlign: "center", 
+                                fontWeight: "bold",
+                                marginBottom: "20px",
+                            }}>
+                            Create New Game
+                        </Typography>
                         <TextField
-                            sx={{
-                                width: "100%",
-                            }}
+                            sx={{width: "100%"}}
                             required
                             id="outlined-required"
                             label="Game Name"
@@ -104,29 +121,30 @@ const Dashboard = () => {
                         />
                         <Button 
                             sx={{
-                            marginTop: "20px",
-                            width: "100%",
-                            height: "50px",
-                            fontSize: "20px",
-                            fontWeight: "bold",
-                            backgroundColor: "#000000",
-                            color: "#FFFFFF",
-                            "&:hover": {
-                                backgroundColor: "#FFFFFF",
-                                color: "#000000",
-                            },
-                            borderRadius: "8px",
-                            border: "2px solid #000000",
+                                marginTop: "20px",
+                                width: "100%",
+                                height: "50px",
+                                fontSize: "18px",
+                                fontWeight: "bold",
+                                backgroundColor: "#000000",
+                                color: "#FFFFFF",
+                                "&:hover": {
+                                    backgroundColor: "#FFFFFF",
+                                    color: "#000000",
+                                },
+                                borderRadius: "8px",
+                                border: "2px solid #000000",
+                                transition: "all 0.3s ease",
                             }} 
                             variant="contained" 
                             onClick={() => postNewGame(name)}
                         >
-                            submit
+                            create
                         </Button>
                     </Box>
                 </Fade>
             </Modal>
-        </>
+        </Container>
     );
 }
 export default Dashboard;
