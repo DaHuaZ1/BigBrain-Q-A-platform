@@ -7,7 +7,6 @@ import {
   Typography,
   Tabs,
   Tab,
-  duration,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchAllGames } from "../getAllGames";
