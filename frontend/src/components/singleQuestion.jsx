@@ -1,5 +1,5 @@
 import React, {useEffect,useState} from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { fetchAllGames } from "../getAllGames";
 import {
     Container, Typography, Box, TextField, Button, FormControl,
@@ -13,6 +13,7 @@ const SingleQuestion = () => {
     const {game_id, question_id} = useParams();
     const [question, setQuestion] = useState(null);
     const [game, setGame] = useState(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchAllGames()
@@ -166,6 +167,17 @@ const SingleQuestion = () => {
                     onClick={() =>saveQuestion(question.id, question.question, question.type, question.duration, question.points, question.media, question.optionAnswers, question.correctAnswers)}
                 >
                     Save Question
+                </Button>
+                <Button
+                    variant="outlined"
+                    size="large"
+                    color="error"
+                    sx={{ mt: 3 }}
+                    onClick={() => {
+                        navigate(`/game/${game_id}`);
+                    }}
+                >
+                    back
                 </Button>
             </Box>
         </Container>
