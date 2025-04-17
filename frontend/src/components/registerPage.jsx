@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Container from '@mui/material/Container';
@@ -8,14 +8,30 @@ import AUTH from "../Constant";
 import { useNavigate } from "react-router-dom";
 import Alert from '@mui/material/Alert';
 import { Modal } from 'antd';
+import CanvasCaptcha from './CanvasCaptcha';
 
 const Signup = (props) => {
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [captcha, setCaptcha] = useState("");
+  const [inputCaptcha, setInputCaptcha] = useState("");
   const navigate = useNavigate()
   const [error, setError] = useState("");
+
+  const generateCaptcha = () => {
+    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let result = "";
+    for (let i = 0; i < 4; i++) {
+      result += chars[Math.floor(Math.random() * chars.length)];
+    }
+    setCaptcha(result);
+  };
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
   const register = (e) => {
     e.preventDefault();
     if (password !== confirmPassword) {
@@ -23,6 +39,15 @@ const Signup = (props) => {
         title: 'Password Mismatch',
         content: 'The passwords you entered do not match. Please double-check.',
       });
+      return;
+    }
+
+    if (inputCaptcha.toUpperCase() !== captcha.toUpperCase()) {
+      Modal.error({
+        title: 'Invalid Captcha',
+        content: 'The captcha you entered is incorrect. Please try again.',
+      });
+      generateCaptcha();
       return;
     }
   
@@ -89,31 +114,41 @@ const Signup = (props) => {
         )}
         <TextField
           required
-          id="outlined-required"
+          id="email-register-input"
           label="email"
           type="email"
           onChange={(e) => setEmail(e.target.value)}
         />
         <TextField
           required
-          id="outlined-required"
+          id="username-register-input"
           label="username"
           onChange={(e) => setUsername(e.target.value)}
         />
         <TextField
           required
-          id="outlined-required"
+          id="password-register-input"
           label="password"
           type="password"
           onChange={(e) => setPassword(e.target.value)}
         />
         <TextField
           required
-          id="outlined-required"
+          id="confirm-password-register-input"
           label="confirm password"
           type="password"
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
+        {/* Captcha */}
+        <Box display="flex" alignItems="center" gap={2}>
+          <TextField
+            required
+            label="Captcha"
+            value={inputCaptcha}
+            onChange={(e) => setInputCaptcha(e.target.value)}
+          />
+          <CanvasCaptcha text={captcha} />
+        </Box>
         <Button type="submit" variant="contained">
             Signup Submit
         </Button>
