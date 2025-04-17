@@ -16,31 +16,31 @@ import Backdrop from "@mui/material/Backdrop";
 import Fade from "@mui/material/Fade";
 
 const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    border: '2px solid #000',
-    boxShadow: 24,
-    p: 4,
+  position: 'absolute',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+  width: 400,
+  bgcolor: 'background.paper',
+  border: '2px solid #000',
+  boxShadow: 24,
+  p: 4,
 };
 
 const SingleGame = () => {
-    const { game_id } = useParams();
-    const [name, setName] = useState("");
-    const [thumbnail, setThumbnail] = useState("");
-    const [tab, setTab] = useState(0);
-    const navigate = useNavigate();
-    const [open, setOpen] = useState(false);
-    const handleOpen = () => setOpen(true);
-    const handleClose = () => setOpen(false);
-    const [questionTitle, setQuestionTitle] = useState([]);
-    const [questions, setQuestions] = useState([]);
-    const [game, setGame] = useState(null);
+  const { game_id } = useParams();
+  const [name, setName] = useState("");
+  const [thumbnail, setThumbnail] = useState("");
+  const [tab, setTab] = useState(0);
+  const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const [questionTitle, setQuestionTitle] = useState([]);
+  const [questions, setQuestions] = useState([]);
+  const [game, setGame] = useState(null);
 
-    useEffect(() => {
+  useEffect(() => {
         fetchAllGames()
         .then((data) => {
             const foundGame = data.games.find((game) => game.id === parseInt(game_id));
