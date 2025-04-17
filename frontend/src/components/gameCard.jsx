@@ -15,6 +15,7 @@ import { putNewGame } from "../putNewGame";
 import { useSnackbar } from "notistack";
 import Grid from '@mui/material/Grid';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import Box from '@mui/material/Box';
 
 const GameCard = (props) => {
     const games = props.games ?? [];
@@ -79,9 +80,19 @@ const GameCard = (props) => {
                             <Typography gutterBottom variant="h6" component="div" noWrap>
                                 {game.name}
                             </Typography>
-                            <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                                info
-                            </Typography>
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+                                <span role="img" aria-label="brain">🧠</span>
+                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                    {game.questions?.length ?? 0} Questions
+                                </Typography>
+                            </Box>
+
+                            <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between"}}>
+                                <span role="img" aria-label="timer">⏱️</span>
+                                <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                                    {game.questions?.reduce((sum, q) => sum + (q.duration || 0), 0)} seconds total
+                                </Typography>
+                            </Box>
                         </CardContent>
                         <CardActions sx={{ display: "flex", justifyContent: "space-between"}}>
                             <Button size="small" onClick={()=>goToSingleGame(game.id)}>Edit Game</Button>
