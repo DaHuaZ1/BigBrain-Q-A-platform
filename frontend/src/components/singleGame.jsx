@@ -7,6 +7,7 @@ import {
   Typography,
   Tabs,
   Tab,
+  duration,
 } from "@mui/material";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchAllGames } from "../getAllGames";
@@ -36,7 +37,9 @@ const SingleGame = () => {
     const [open, setOpen] = useState(false);
     const handleOpen = () => setOpen(true);
     const handleClose = () => setOpen(false);
-    const [question, setQuestion] = useState([]);
+    const [questionTitle, setQuestionTitle] = useState([]);
+    const [questions, setQuestions] = useState([]);
+    const [game, setGame] = useState(null);
 
     useEffect(() => {
         fetchAllGames()
@@ -45,10 +48,12 @@ const SingleGame = () => {
             if (foundGame) {
             setName(foundGame.name);
             setThumbnail(foundGame.thumbnail);
+            setQuestions(foundGame.questions);
+            setGame(foundGame);
             }
         })
         .catch((error) => console.error("Error fetching games:", error));
-    }, []);
+    }, [game, questions]);
 
     const updateGame = () => {
         fetchAllGames()
@@ -60,7 +65,6 @@ const SingleGame = () => {
             return putNewGame(updatedGames);
         })
         .then(() => {
-            navigate("/dashboard");
             setName("");
             setThumbnail("");
         })
@@ -71,6 +75,52 @@ const SingleGame = () => {
         setTab(newValue);
     };
 
+    const postNewQuestion = () => {
+        fetchAllGames()
+        .then((data) => {
+            const oldGame = Array.isArray(data.games) ? data.games : [];
+            const foundGame = oldGame.find((game) => game.id === parseInt(game_id));
+            const existingQuestions = foundGame.questions || [];
+            const maxId = existingQuestions.reduce((max, q) => Math.max(max, q.id || 0), 0);
+
+            const newQuestion = {
+                question: questionTitle,
+                duration: 0,
+                points: 0,
+                type: "",
+                optionAnswers: [],
+                correctAnswers: [],
+                media: "",
+                id: maxId + 1,
+            };
+
+            const updatedQuestions = {
+                ...foundGame,
+                questions:[...existingQuestions,newQuestion]};
+
+            const updatedGame = oldGame.map((game) =>
+                game.id === parseInt(game_id) ? updatedQuestions : game
+            );
+
+            return putNewGame(updatedGame);
+        })
+        .then(() => {
+            handleClose();
+            setQuestionTitle("");
+        })
+    };
+
+    if (!game) {
+        return <div>Loading...</div>;
+    }
+
+    const editQuestion = () => {
+        console.log("Edit question clicked");
+    }
+
+    const deleteQuestion = () => {
+        console.log("Delete question clicked");
+    }
 
     return (
         <Container maxWidth="sm" sx={{
@@ -89,7 +139,7 @@ const SingleGame = () => {
                 backgroundColor: 'background.paper',
             }}
         >
-            <Typography variant="h5">Edit Game</Typography>
+            <Typography variant="h5">Edit Game:{game.name}</Typography>
             <Tabs value={tab} onChange={handleTabChange} centered>
                 <Tab label="Game Info" />
                 <Tab label="Questions" />
@@ -109,17 +159,38 @@ const SingleGame = () => {
                     />
                     <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Button variant="contained" onClick={updateGame}>Save Changes</Button>
-                        <Button variant="outlined" sx={{ background: "red", color: "white" }} onClick={() => navigate("/dashboard")}>Cancel</Button>
+                        <Button variant="contained" color="error" onClick={() => navigate("/dashboard")}>back</Button>
                     </Box>
                 </Box>
             )}
 
             {tab === 1 && (
                 <Box sx={{ mt: 2 }}>
-                    <Typography variant="h6">Manage Questions</Typography>
-                    <Button variant="contained" sx={{ mt: 2 }} onClick={handleOpen}>
+                    <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                        {questions.map((question) => (
+                            <React.Fragment key={question.id}>
+                                <Typography variant="h6">Question: {question.id}</Typography>
+                                <Box sx={{ display:"flex", justifyContent:"space-between" , border: '1px solid #e0e0e0', borderRadius: 2, p: 2 }}>
+                                    <Typography variant="body1">{question.question}</Typography>
+                                    <Box sx={{ display: 'flex', gap: 1 }}>
+                                        <Button variant="contained" size="small" onClick={editQuestion}>Edit</Button>
+                                        <Button variant="contained" size="small" color="error" onClick={deleteQuestion}>Delete</Button>
+                                    </Box>
+                                </Box>
+                            </React.Fragment>
+                        ))}
+                    </Box>
+                    {questions.length === 0 && (
+                        <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
+                            No questions available. Please add a question.
+                        </Typography>
+                    )}
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
+                    <Button variant="contained" onClick={handleOpen}>
                         Add New Question
                     </Button>
+                    <Button variant="contained" color="error" onClick={() => navigate("/dashboard")}>back</Button>
+                    </Box>
                 </Box>
             )}
       </Box>
@@ -143,15 +214,15 @@ const SingleGame = () => {
                             fontWeight: "bold",
                             marginBottom: "20px",
                         }}>
-                        Create New Game
+                        Add New Question
                     </Typography>
                     <TextField
                         sx={{width: "100%"}}
                         required
                         id="outlined-required"
-                        label="Question"
-                        onChange={(e) => setQuestion(e.target.value)}
-                        value={name}
+                        label="Question Title"
+                        onChange={(e) => setQuestionTitle(e.target.value)}
+                        value={questionTitle}
                     />
                     <Button 
                         sx={{
