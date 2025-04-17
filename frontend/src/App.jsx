@@ -8,6 +8,7 @@ import Dashboard from './components/Dashboard';
 import SingleGame from './components/singleGame';
 import { SnackbarProvider } from 'notistack';
 import SingleQuestion from './components/singleQuestion';
+import GameJoinPage from './components/gameJoinPage';
 
 function App() {
   const[token, setToken]=useState(localStorage.getItem('token'));
@@ -23,6 +24,8 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/game/:game_id" element={<SingleGame />} />
           <Route path="/game/:game_id/question/:question_id" element={<SingleQuestion />} />
+          <Route path="/play" element={<GameJoinPage />} />
+          <Route path="/play/session/:sessionId" element={<GameJoinPage />} />
         </Routes>
 
       </BrowserRouter>
