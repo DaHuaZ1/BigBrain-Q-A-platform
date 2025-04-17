@@ -41,34 +41,34 @@ const SingleGame = () => {
   const [game, setGame] = useState(null);
 
   useEffect(() => {
-        fetchAllGames()
-        .then((data) => {
-            const foundGame = data.games.find((game) => game.id === parseInt(game_id));
-            if (foundGame) {
-            setName(foundGame.name);
-            setThumbnail(foundGame.thumbnail);
-            setQuestions(foundGame.questions);
-            setGame(foundGame);
-            }
-        })
-        .catch((error) => console.error("Error fetching games:", error));
-    }, [game,questions]);
+    fetchAllGames()
+      .then((data) => {
+        const foundGame = data.games.find((game) => game.id === parseInt(game_id));
+        if (foundGame) {
+          setName(foundGame.name);
+          setThumbnail(foundGame.thumbnail);
+          setQuestions(foundGame.questions);
+          setGame(foundGame);
+        }
+      })
+      .catch((error) => console.error("Error fetching games:", error));
+  }, [game,questions]);
 
-    const updateGame = () => {
-        fetchAllGames()
-        .then((data) => {
-            const oldGames = data.games || [];
-            const updatedGames = oldGames.map((game) =>
-            game.id === parseInt(game_id) ? { ...game, name, thumbnail } : game
-            );
-            return putNewGame(updatedGames);
-        })
-        .then(() => {
-            setName("");
-            setThumbnail("");
-        })
-        .catch((error) => console.error("Error updating game:", error));
-    };
+  const updateGame = () => {
+    fetchAllGames()
+      .then((data) => {
+        const oldGames = data.games || [];
+        const updatedGames = oldGames.map((game) =>
+          game.id === parseInt(game_id) ? { ...game, name, thumbnail } : game
+        );
+        return putNewGame(updatedGames);
+      })
+      .then(() => {
+        setName("");
+        setThumbnail("");
+      })
+      .catch((error) => console.error("Error updating game:", error));
+  };
 
     const handleTabChange = (event, newValue) => {
         setTab(newValue);
