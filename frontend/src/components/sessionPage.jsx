@@ -32,7 +32,7 @@ const SessionPage = () => {
   
     MutateGameSession(game_id, type).then((res) => {
       if (res.data?.status) {
-        fetchStatus(); // 刷新状态
+        fetchStatus(); 
       } else {
         console.error("Failed to mutate session:", res);
       }
