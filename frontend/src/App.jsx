@@ -9,6 +9,7 @@ import SingleGame from './components/singleGame';
 import { SnackbarProvider } from 'notistack';
 import SingleQuestion from './components/singleQuestion';
 import GameJoinPage from './components/gameJoinPage';
+import SessionPage from './components/sessionPage';
 
 function App() {
   const[token, setToken]=useState(localStorage.getItem('token'));
@@ -24,6 +25,7 @@ function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/game/:game_id" element={<SingleGame />} />
           <Route path="/game/:game_id/question/:question_id" element={<SingleQuestion />} />
+          <Route path='/game/:game_id/session/:session_id' element={<SessionPage />} />
           <Route path="/play" element={<GameJoinPage />} />
           <Route path="/play/session/:sessionId" element={<GameJoinPage />} />
         </Routes>
