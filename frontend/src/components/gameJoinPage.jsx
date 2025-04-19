@@ -2,6 +2,8 @@
 import { useState, useEffect } from 'react';
 import { Container, TextField, Button, Typography } from '@mui/material'; 
 import { useParams } from 'react-router-dom';
+import Alert from '@mui/material/Alert';
+
 
 //Main
 const GameJoinPage = () => {
@@ -11,6 +13,8 @@ const GameJoinPage = () => {
   const [sessionId, setSessionId] = useState('');
   const [name, setName] = useState('');
 
+  const [error, setError] = useState('');
+
   //SessionId judgment
   useEffect(() => {
     if (routeSessionId) {
@@ -19,55 +23,74 @@ const GameJoinPage = () => {
   }, [routeSessionId]);
 
   const handleStartGame = () => {
-    console.log('Session ID:', sessionId);
-    console.log('Name:', name);
-    // Waiting for 2.4.2
+    if (!name.trim() && !sessionId.trim()) {
+      setError('Please enter your name and session ID.');
+    } else if (!name.trim()) {
+      setError('Please enter your name.');
+    } else if (!sessionId.trim()) {
+      setError('Session ID is required.');
+    } else {
+      setError('');
+      console.log('Session ID:', sessionId);
+      console.log('Name:', name);
+      // Waiting for 2.4.2
+    }
   };
 
   return (
-    <Container
-      maxWidth="sm"
-      sx={{
-        minWidth: '400px',
-        minHeight: '700px',
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        gap: 3,
-        padding: 3,
-        textAlign: 'center',
-      }}
-    >
-      <Typography variant="h5">Join a Game Session</Typography>
-
-      {/* Disable Session ID input (if there is a Session ID from the route) */}
-      <TextField
-        label="Session ID"
-        variant="outlined"
-        value={sessionId}
-        onChange={(e) => setSessionId(e.target.value)}
-        fullWidth
-        disabled={!!routeSessionId}
-      />
-
-      <TextField
-        label="Your Name"
-        variant="outlined"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        fullWidth
-      />
-
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleStartGame}
-        sx={{ minWidth: '200px' }}
+    <>
+      <Container
+        maxWidth="sm"
+        sx={{
+          minWidth: '400px',
+          minHeight: '700px',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: 3,
+          padding: 3,
+          textAlign: 'center',
+        }}
       >
+        <Typography variant="h5">Join a Game Session</Typography>
+        {error && (
+          <Alert severity="error" sx={{ width: '100%' }}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Disable Session ID input (if there is a Session ID from the route) */}
+        <TextField
+          required
+          label="Session ID"
+          variant="outlined"
+          value={sessionId}
+          onChange={(e) => setSessionId(e.target.value)}
+          fullWidth
+          disabled={!!routeSessionId}
+        />
+
+        <TextField
+          required
+          label="Your Name"
+          variant="outlined"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          fullWidth
+        />
+
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={handleStartGame}
+          sx={{ minWidth: '200px' }}
+        >
         Start Game
-      </Button>
-    </Container>
+        </Button>
+      </Container>
+    </>
+    
   );
 };
 
