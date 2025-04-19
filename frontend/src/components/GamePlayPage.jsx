@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Typography, Button, Box } from '@mui/material';
+import { Container, Stack } from '@mui/material';
 
 const GamePlayPage = () => {
   const { playerId, sessionId } = useParams();
@@ -20,7 +21,6 @@ const GamePlayPage = () => {
         const res = await fetch(`http://localhost:5005/play/${playerId}/question`);
   
         if (!res.ok) {
-          console.warn('Cannot fetch question, assuming game has ended. Navigating...');
           navigate(`/play/session/${sessionId}/player/${playerId}/result`);
           return;
         }
@@ -28,12 +28,7 @@ const GamePlayPage = () => {
         const data = await res.json();
         const newQuestion = data.question;
   
-        if (!newQuestion) {
-          throw new Error('No question in response');
-        }
-  
         if (newQuestion.id !== questionId) {
-          console.log('New question detected! Updating UI...');
           setQuestionData(newQuestion);
           setQuestionId(newQuestion.id);
           setCountdown(newQuestion.duration);
@@ -45,7 +40,7 @@ const GamePlayPage = () => {
           localStorage.setItem('questionPoints', JSON.stringify(stored));
         }
       } catch (err) {
-        console.error('Polling error:', err.message || err);
+        console.error('error:', err.message || err);
       }
     }, 1000);
   
@@ -63,12 +58,8 @@ const GamePlayPage = () => {
   };
 
   const submitAnswer = async (options) => {
-    // const answers = options.map(index => questionData.optionAnswers[index]);
     const answers = options;
     const body = JSON.stringify({ answers });
-  
-    console.log('Submitting to:', `http://localhost:5005/play/${playerId}/answer`);
-    console.log('Payload:', body);
   
     try {
       const response = await fetch(`http://localhost:5005/play/${playerId}/answer`, {
@@ -81,18 +72,15 @@ const GamePlayPage = () => {
   
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Server error text:', errorText);
+        console.error('error:', errorText);
         throw new Error('Failed to submit answer');
       }
   
       console.log('Answer submitted:', answers);
     } catch (err) {
-      console.error('Submit error:', err);
+      console.error('error:', err);
     }
   };
-  
-  
-  
 
   const handleOptionClick = (index) => {
     if (!questionType || countdown === 0) return;
@@ -110,15 +98,11 @@ const GamePlayPage = () => {
     setSelectedOptions(newSelection);
     submitAnswer(newSelection);
   };
-  
-  
-  
 
   const fetchQuestion = async () => {
     try {
       const res = await fetch(`http://localhost:5005/play/${playerId}/question`);
       const data = await res.json();
-      console.log('Question data from backend:', data);
   
       const q = data.question;
       setQuestionData(q);
@@ -141,11 +125,6 @@ const GamePlayPage = () => {
     try {
       const res = await fetch(`http://localhost:5005/play/${playerId}/answer`);
       const data = await res.json();
-      console.log('Raw response from /answer:', data);
-  
-      if (!Array.isArray(data.answers)) {
-        throw new Error('Invalid answer format from server');
-      }
   
       setCorrectAnswers(data.answers);
       setShowAnswer(true);
@@ -153,13 +132,6 @@ const GamePlayPage = () => {
       console.error('Failed to fetch correct answers:', err);
     }
   };
-  
-  
-  
-
-  //   const renderQuestion = (data) => {
-  //     console.log('Rendering question:', data);
-  //   };
   
   useEffect(() => {
     fetchQuestion();
@@ -198,70 +170,95 @@ const GamePlayPage = () => {
   
 
   return (
-    <Box sx={{ padding: 3 }}>
-      <Typography variant="h4" gutterBottom>
-      GamePlayPage
+    <Container maxWidth="sm" sx={{ p: 2 }}>
+      <Typography variant="h4" gutterBottom align="center">
+    GamePlayPage
       </Typography>
 
-      {error && <Typography color="error">{error}</Typography>}
-
-      <Box>
-        {/* Rendering the question title */}
-        <Typography variant="h5" gutterBottom>
-          {questionData?.question ?? 'No question'}
+      {error && (
+        <Typography color="error" align="center">
+          {error}
         </Typography>
-        {/* Rendering Score */}
-        <Typography variant="body" gutterBottom>
-        Score:{questionData?.points ?? 0} point
-        </Typography>
-
-        {/* rendering timer */}
-        <Typography variant="body" gutterBottom>
-        Timer:{questionData?.duration ?? 0} seconds
-        </Typography>
-        <Typography variant="body" gutterBottom color={countdown <= 3 ? 'red' : 'text.primary'}>
-        ⏳{countdown} seconds
-        </Typography>
-      </Box>
-      {questionData?.media && (
-        <Box sx={{ my: 2 }}>
-          <iframe
-            width="80%"
-            height="500"
-            src={transformMediaUrl(questionData.media)}
-            title="Question Media"
-            allowFullScreen
-          />
-        </Box>
       )}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2 }}>
-        {questionData?.optionAnswers?.map((option, index) => (
-          <Button
-            key={index}
-            variant={
-              selectedOptions.includes(index)
-                ? 'contained'
-                : showAnswer && correctAnswers.includes(index)
-                  ? 'contained'
-                  : 'outlined'
-            }
-            fullWidth
-            color={
-              selectedOptions.includes(index)
-                ? 'primary'
-                : showAnswer && correctAnswers.includes(index)
-                  ? 'success'
-                  : 'inherit'
-            }
-            onClick={() => handleOptionClick(index)}
-            disabled={countdown === 0 || showAnswer}
-          >
-            {option}
-          </Button>
-        ))}
-      </Box>
 
-    </Box>
+      {questionData && (
+        <Stack spacing={2} mt={2}>
+          <Typography variant="h6" align="center">
+            {questionData.question}
+          </Typography>
+
+          <Typography variant="body2" align="center">
+        Score: {questionData.points ?? 0} point
+          </Typography>
+
+          <Typography variant="body2" align="center">
+        Timer: {questionData.duration ?? 0} seconds
+          </Typography>
+
+          <Typography
+            variant="h6"
+            align="center"
+            color={countdown <= 3 ? 'error' : 'text.primary'}
+          >
+        ⏳ {countdown} seconds
+          </Typography>
+
+          {questionData.media && (
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <iframe
+                width="100%"
+                height="500"
+                src={transformMediaUrl(questionData.media)}
+                title="Question Media"
+                allowFullScreen
+              />
+            </Box>
+          )}
+
+          <Stack spacing={1}>
+            {questionData.optionAnswers.map((option, index) => (
+              <Button
+                key={index}
+                fullWidth
+                onClick={() => handleOptionClick(index)}
+                sx={{
+                  whiteSpace: 'normal',
+                  textAlign: 'left',
+                  pointerEvents: countdown === 0 || showAnswer ? 'none' : 'auto',
+                  opacity: 1
+                }}
+                variant={
+                  showAnswer
+                    ? correctAnswers.includes(index)
+                      ? 'contained'
+                      : selectedOptions.includes(index)
+                        ? 'contained'
+                        : 'outlined'
+                    : selectedOptions.includes(index)
+                      ? 'contained'
+                      : 'outlined'
+                }
+                color={
+                  showAnswer
+                    ? correctAnswers.includes(index)
+                      ? 'success'
+                      : selectedOptions.includes(index)
+                        ? 'error'
+                        : 'inherit'
+                    : selectedOptions.includes(index)
+                      ? 'primary'
+                      : 'inherit'
+                }
+              >
+                {option}
+              </Button>
+            
+            ))}
+          </Stack>
+        </Stack>
+      )}
+    </Container>
+
   );
 };
 
