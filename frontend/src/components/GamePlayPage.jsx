@@ -9,6 +9,9 @@ const GamePlayPage = () => {
   const [countdown, setCountdown] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
   const questionType = questionData?.type; 
+  const [correctAnswers, setCorrectAnswers] = useState([]);
+  const [showAnswer, setShowAnswer] = useState(false);
+
 
 
   const transformMediaUrl = (url) => {
@@ -82,6 +85,19 @@ const GamePlayPage = () => {
     }
   };
 
+  const fetchCorrectAnswers = async () => {
+    try {
+      const res = await fetch(`http://localhost:5005/play/${playerId}/answer`);
+      const data = await res.json();
+      console.log('Correct answer indices:', data.answer.correctAnswers);
+      setCorrectAnswers(data.answer.correctAnswers || []);
+      setShowAnswer(true);
+    } catch (err) {
+      console.error('Failed to fetch correct answers:', err);
+    }
+  };
+  
+
   //   const renderQuestion = (data) => {
   //     console.log('Rendering question:', data);
   //   };
@@ -95,6 +111,13 @@ const GamePlayPage = () => {
       setCountdown(questionData.duration);
     }
   }, [questionData]);
+
+  useEffect(() => {
+    if (countdown === 0 && !showAnswer) {
+      fetchCorrectAnswers();
+    }
+  }, [countdown]);
+  
 
   useEffect(() => {
     if (countdown === null) return;
@@ -156,11 +179,23 @@ const GamePlayPage = () => {
         {questionData?.optionAnswers?.map((option, index) => (
           <Button
             key={index}
-            variant={selectedOptions.includes(index) ? 'contained' : 'outlined'}
+            variant={
+              selectedOptions.includes(index)
+                ? 'contained'
+                : showAnswer && correctAnswers.includes(index)
+                  ? 'contained'
+                  : 'outlined'
+            }
             fullWidth
-            color={selectedOptions.includes(index) ? 'primary' : 'inherit'}
+            color={
+              selectedOptions.includes(index)
+                ? 'primary'
+                : showAnswer && correctAnswers.includes(index)
+                  ? 'success'
+                  : 'inherit'
+            }
             onClick={() => handleOptionClick(index)}
-            disabled={countdown === 0}
+            disabled={countdown === 0 || showAnswer}
           >
             {option}
           </Button>
