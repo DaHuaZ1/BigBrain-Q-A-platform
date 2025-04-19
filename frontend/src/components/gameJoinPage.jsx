@@ -53,7 +53,7 @@ const GameJoinPage = () => {
         .then((data) => {
           console.log('Join API response:', data);
           const playerId = data.playerId;
-          navigate(`/play/session/${sessionId}/play/${playerId}`);
+          navigate(`/play/wait/session/${sessionId}/player/${playerId}`);
         })
         
     }

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
-const GamePlayPage = () => {
+const GameWaitPage = () => {
   const { playerId } = useParams();
   const [gameStarted, setGameStarted] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -54,6 +54,6 @@ const GamePlayPage = () => {
   );
 };
 
-export default GamePlayPage;
+export default GameWaitPage;
 
 
