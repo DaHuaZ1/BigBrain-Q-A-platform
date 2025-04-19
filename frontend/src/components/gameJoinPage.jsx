@@ -1,12 +1,13 @@
 //import
 import { useState, useEffect } from 'react';
 import { Container, TextField, Button, Typography } from '@mui/material'; 
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
 
 
 //Main
 const GameJoinPage = () => {
+  const navigate = useNavigate();
   //read sessionId from route
   const { sessionId: routeSessionId } = useParams();
 
@@ -33,7 +34,28 @@ const GameJoinPage = () => {
       setError('');
       console.log('Session ID:', sessionId);
       console.log('Name:', name);
-      // Waiting for 2.4.2
+      // Jump to gamePlagPage
+      fetch(`http://localhost:5005/play/join/${sessionId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ name }),
+      })
+        .then((res) => {
+          if (!res.ok) {
+            return res.json().then((data) => {
+              throw new Error(data.error || 'Failed to join the session.');
+            });
+          }
+          return res.json();
+        })
+        .then(() => {
+          navigate(`/play/session/${sessionId}/play`);
+        })
+        .catch((err) => {
+          setError(err.message);
+        });
     }
   };
 
