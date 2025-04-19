@@ -13,7 +13,6 @@ const GamePlayerResultPage = () => {
       try {
         const res = await fetch(`http://localhost:5005/play/${playerId}/results`);
         const data = await res.json();
-        console.log('Game results from backend:', data);
 
         const questionPoints = JSON.parse(localStorage.getItem('questionPoints') || '{}');
         let scoreSum = 0;
@@ -38,7 +37,7 @@ const GamePlayerResultPage = () => {
         setResultData(enriched);
         setTotalScore(scoreSum);
       } catch (err) {
-        console.error('Failed to fetch results:', err);
+        console.error('error:', err);
         setError('Failed to fetch game results');
       }
     };

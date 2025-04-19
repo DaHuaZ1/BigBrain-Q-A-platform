@@ -21,7 +21,6 @@ const GamePlayPage = () => {
         const res = await fetch(`http://localhost:5005/play/${playerId}/question`);
   
         if (!res.ok) {
-          console.warn('Cannot fetch question, assuming game has ended. Navigating...');
           navigate(`/play/session/${sessionId}/player/${playerId}/result`);
           return;
         }
@@ -29,12 +28,7 @@ const GamePlayPage = () => {
         const data = await res.json();
         const newQuestion = data.question;
   
-        if (!newQuestion) {
-          throw new Error('No question in response');
-        }
-  
         if (newQuestion.id !== questionId) {
-          console.log('New question detected! Updating UI...');
           setQuestionData(newQuestion);
           setQuestionId(newQuestion.id);
           setCountdown(newQuestion.duration);
@@ -46,7 +40,7 @@ const GamePlayPage = () => {
           localStorage.setItem('questionPoints', JSON.stringify(stored));
         }
       } catch (err) {
-        console.error('Polling error:', err.message || err);
+        console.error('error:', err.message || err);
       }
     }, 1000);
   
@@ -64,12 +58,8 @@ const GamePlayPage = () => {
   };
 
   const submitAnswer = async (options) => {
-    // const answers = options.map(index => questionData.optionAnswers[index]);
     const answers = options;
     const body = JSON.stringify({ answers });
-  
-    console.log('Submitting to:', `http://localhost:5005/play/${playerId}/answer`);
-    console.log('Payload:', body);
   
     try {
       const response = await fetch(`http://localhost:5005/play/${playerId}/answer`, {
@@ -82,18 +72,15 @@ const GamePlayPage = () => {
   
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('Server error text:', errorText);
+        console.error('error:', errorText);
         throw new Error('Failed to submit answer');
       }
   
       console.log('Answer submitted:', answers);
     } catch (err) {
-      console.error('Submit error:', err);
+      console.error('error:', err);
     }
   };
-  
-  
-  
 
   const handleOptionClick = (index) => {
     if (!questionType || countdown === 0) return;
@@ -111,15 +98,11 @@ const GamePlayPage = () => {
     setSelectedOptions(newSelection);
     submitAnswer(newSelection);
   };
-  
-  
-  
 
   const fetchQuestion = async () => {
     try {
       const res = await fetch(`http://localhost:5005/play/${playerId}/question`);
       const data = await res.json();
-      console.log('Question data from backend:', data);
   
       const q = data.question;
       setQuestionData(q);
@@ -142,11 +125,6 @@ const GamePlayPage = () => {
     try {
       const res = await fetch(`http://localhost:5005/play/${playerId}/answer`);
       const data = await res.json();
-      console.log('Raw response from /answer:', data);
-  
-      if (!Array.isArray(data.answers)) {
-        throw new Error('Invalid answer format from server');
-      }
   
       setCorrectAnswers(data.answers);
       setShowAnswer(true);
@@ -154,13 +132,6 @@ const GamePlayPage = () => {
       console.error('Failed to fetch correct answers:', err);
     }
   };
-  
-  
-  
-
-  //   const renderQuestion = (data) => {
-  //     console.log('Rendering question:', data);
-  //   };
   
   useEffect(() => {
     fetchQuestion();
