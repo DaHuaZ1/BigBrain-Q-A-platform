@@ -18,8 +18,19 @@ const GamePlayPage = () => {
     const pollInterval = setInterval(async () => {
       try {
         const res = await fetch(`http://localhost:5005/play/${playerId}/question`);
+  
+        if (!res.ok) {
+          console.warn('Cannot fetch question, assuming game has ended. Navigating...');
+          navigate(`/play/session/${sessionId}/player/${playerId}/result`);
+          return;
+        }
+  
         const data = await res.json();
         const newQuestion = data.question;
+  
+        if (!newQuestion) {
+          throw new Error('No question in response');
+        }
   
         if (newQuestion.id !== questionId) {
           console.log('New question detected! Updating UI...');
@@ -30,19 +41,14 @@ const GamePlayPage = () => {
           setCorrectAnswers([]);
           setShowAnswer(false);
         }
-        const resStatus = await fetch(`http://localhost:5005/play/${playerId}/status`);
-        const dataStatus = await resStatus.json();
-        if (dataStatus.started === false) {
-          console.log('Game ended. Navigating to result page...');
-          navigate(`/play/session/${sessionId}/player/${playerId}/result`);
-        }
       } catch (err) {
-        console.error('Polling error:', err);
+        console.error('Polling error:', err.message || err);
       }
     }, 1000);
   
     return () => clearInterval(pollInterval);
-  }, [playerId, questionId]);
+  }, [playerId, questionId, sessionId, navigate]);
+  
   
 
 
