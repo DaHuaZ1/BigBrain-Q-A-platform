@@ -5,6 +5,7 @@ import { Typography, Button, Box } from '@mui/material';
 const GamePlayPage = () => {
   const { playerId } = useParams();
   const [questionData, setQuestionData] = useState(null);
+  const [questionId, setQuestionId] = useState(null);
   const [error, setError] = useState(null);
   const [countdown, setCountdown] = useState(null);
   const [selectedOptions, setSelectedOptions] = useState([]);
@@ -12,6 +13,30 @@ const GamePlayPage = () => {
   const [correctAnswers, setCorrectAnswers] = useState([]);
   const [showAnswer, setShowAnswer] = useState(false);
 
+  useEffect(() => {
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`http://localhost:5005/play/${playerId}/question`);
+        const data = await res.json();
+        const newQuestion = data.question;
+  
+        if (newQuestion.id !== questionId) {
+          console.log('🔄 New question detected! Updating UI...');
+          setQuestionData(newQuestion);
+          setQuestionId(newQuestion.id);
+          setCountdown(newQuestion.duration);
+          setSelectedOptions([]);
+          setCorrectAnswers([]);
+          setShowAnswer(false);
+        }
+      } catch (err) {
+        console.error('Polling error:', err);
+      }
+    }, 1000);
+  
+    return () => clearInterval(pollInterval);
+  }, [playerId, questionId]);
+  
 
 
   const transformMediaUrl = (url) => {
@@ -78,6 +103,7 @@ const GamePlayPage = () => {
       const data = await res.json();
       console.log('Question data from backend:', data);
       setQuestionData(data.question);
+      setQuestionId(data.question.id);
     //   renderQuestion(data);
     } catch (err) {
       console.error(err);
@@ -89,13 +115,20 @@ const GamePlayPage = () => {
     try {
       const res = await fetch(`http://localhost:5005/play/${playerId}/answer`);
       const data = await res.json();
-      console.log('Correct answer indices:', data.answer.correctAnswers);
-      setCorrectAnswers(data.answer.correctAnswers || []);
+      console.log('✅ Raw response from /answer:', data);
+  
+      if (!Array.isArray(data.answers)) {
+        throw new Error('Invalid answer format from server');
+      }
+  
+      setCorrectAnswers(data.answers);
       setShowAnswer(true);
     } catch (err) {
       console.error('Failed to fetch correct answers:', err);
     }
   };
+  
+  
   
 
   //   const renderQuestion = (data) => {

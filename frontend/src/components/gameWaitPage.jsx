@@ -37,7 +37,7 @@ const GameWaitPage = () => {
     checkGameStatus();
 
     // If the game hasn't started yet, set up polling
-    intervalId = setInterval(checkGameStatus, 3000);
+    intervalId = setInterval(checkGameStatus, 1000);
 
     return () => clearInterval(intervalId);
   }, [playerId]);
