@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Typography, Button, Box } from '@mui/material';
+import { Container, Stack } from '@mui/material';
 
 const GamePlayPage = () => {
   const { playerId, sessionId } = useParams();
@@ -198,70 +199,82 @@ const GamePlayPage = () => {
   
 
   return (
-    <Box sx={{ padding: 3 }}>
-      <Typography variant="h4" gutterBottom>
-      GamePlayPage
+    <Container maxWidth="sm" sx={{ p: 2 }}>
+      <Typography variant="h4" gutterBottom align="center">
+    GamePlayPage
       </Typography>
 
-      {error && <Typography color="error">{error}</Typography>}
-
-      <Box>
-        {/* Rendering the question title */}
-        <Typography variant="h5" gutterBottom>
-          {questionData?.question ?? 'No question'}
+      {error && (
+        <Typography color="error" align="center">
+          {error}
         </Typography>
-        {/* Rendering Score */}
-        <Typography variant="body" gutterBottom>
-        Score:{questionData?.points ?? 0} point
-        </Typography>
-
-        {/* rendering timer */}
-        <Typography variant="body" gutterBottom>
-        Timer:{questionData?.duration ?? 0} seconds
-        </Typography>
-        <Typography variant="body" gutterBottom color={countdown <= 3 ? 'red' : 'text.primary'}>
-        ⏳{countdown} seconds
-        </Typography>
-      </Box>
-      {questionData?.media && (
-        <Box sx={{ my: 2 }}>
-          <iframe
-            width="80%"
-            height="500"
-            src={transformMediaUrl(questionData.media)}
-            title="Question Media"
-            allowFullScreen
-          />
-        </Box>
       )}
-      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 2 }}>
-        {questionData?.optionAnswers?.map((option, index) => (
-          <Button
-            key={index}
-            variant={
-              selectedOptions.includes(index)
-                ? 'contained'
-                : showAnswer && correctAnswers.includes(index)
-                  ? 'contained'
-                  : 'outlined'
-            }
-            fullWidth
-            color={
-              selectedOptions.includes(index)
-                ? 'primary'
-                : showAnswer && correctAnswers.includes(index)
-                  ? 'success'
-                  : 'inherit'
-            }
-            onClick={() => handleOptionClick(index)}
-            disabled={countdown === 0 || showAnswer}
-          >
-            {option}
-          </Button>
-        ))}
-      </Box>
 
-    </Box>
+      {questionData && (
+        <Stack spacing={2} mt={2}>
+          <Typography variant="h6" align="center">
+            {questionData.question}
+          </Typography>
+
+          <Typography variant="body2" align="center">
+        Score: {questionData.points ?? 0} point
+          </Typography>
+
+          <Typography variant="body2" align="center">
+        Timer: {questionData.duration ?? 0} seconds
+          </Typography>
+
+          <Typography
+            variant="h6"
+            align="center"
+            color={countdown <= 3 ? 'error' : 'text.primary'}
+          >
+        ⏳ {countdown} seconds
+          </Typography>
+
+          {questionData.media && (
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <iframe
+                width="100%"
+                height="500"
+                src={transformMediaUrl(questionData.media)}
+                title="Question Media"
+                allowFullScreen
+              />
+            </Box>
+          )}
+
+          <Stack spacing={1}>
+            {questionData.optionAnswers.map((option, index) => (
+              <Button
+                key={index}
+                variant={
+                  selectedOptions.includes(index)
+                    ? 'contained'
+                    : showAnswer && correctAnswers.includes(index)
+                      ? 'contained'
+                      : 'outlined'
+                }
+                color={
+                  selectedOptions.includes(index)
+                    ? 'primary'
+                    : showAnswer && correctAnswers.includes(index)
+                      ? 'success'
+                      : 'inherit'
+                }
+                fullWidth
+                onClick={() => handleOptionClick(index)}
+                disabled={countdown === 0 || showAnswer}
+                sx={{ whiteSpace: 'normal', textAlign: 'left' }}
+              >
+                {option}
+              </Button>
+            ))}
+          </Stack>
+        </Stack>
+      )}
+    </Container>
+
   );
 };
 
