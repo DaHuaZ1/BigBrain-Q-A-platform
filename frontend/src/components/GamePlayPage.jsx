@@ -40,6 +40,9 @@ const GamePlayPage = () => {
           setSelectedOptions([]);
           setCorrectAnswers([]);
           setShowAnswer(false);
+          const stored = JSON.parse(localStorage.getItem('questionPoints') || '{}');
+          stored[newQuestion.id] = newQuestion.points ?? 0;
+          localStorage.setItem('questionPoints', JSON.stringify(stored));
         }
       } catch (err) {
         console.error('Polling error:', err.message || err);
@@ -60,7 +63,8 @@ const GamePlayPage = () => {
   };
 
   const submitAnswer = async (options) => {
-    const answers = options.map(index => questionData.optionAnswers[index]);
+    // const answers = options.map(index => questionData.optionAnswers[index]);
+    const answers = options;
     const body = JSON.stringify({ answers });
   
     console.log('Submitting to:', `http://localhost:5005/play/${playerId}/answer`);
@@ -115,14 +119,23 @@ const GamePlayPage = () => {
       const res = await fetch(`http://localhost:5005/play/${playerId}/question`);
       const data = await res.json();
       console.log('Question data from backend:', data);
-      setQuestionData(data.question);
-      setQuestionId(data.question.id);
-    //   renderQuestion(data);
+  
+      const q = data.question;
+      setQuestionData(q);
+      setQuestionId(q.id);
+  
+      const stored = JSON.parse(localStorage.getItem('questionPoints') || '{}');
+      if (!(q.id in stored)) {
+        stored[q.id] = q.points ?? 0;
+        localStorage.setItem('questionPoints', JSON.stringify(stored));
+      }
+  
     } catch (err) {
       console.error(err);
       setError('Failed to load question');
     }
   };
+  
 
   const fetchCorrectAnswers = async () => {
     try {
