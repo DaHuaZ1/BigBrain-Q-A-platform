@@ -29,7 +29,7 @@ function App() {
           <Route path='/game/:game_id/session/:session_id' element={<SessionPage />} />
           <Route path="/play" element={<GameJoinPage />} />
           <Route path="/play/session/:sessionId" element={<GameJoinPage />} />
-          <Route path="/play/session/:sessionId/play" element={<GamePlayPage />} />
+          <Route path="/play/session/:sessionId/play/:playerId" element={<GamePlayPage />} />
         </Routes>
 
       </BrowserRouter>

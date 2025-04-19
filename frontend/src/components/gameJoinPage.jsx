@@ -50,12 +50,12 @@ const GameJoinPage = () => {
           }
           return res.json();
         })
-        .then(() => {
-          navigate(`/play/session/${sessionId}/play`);
+        .then((data) => {
+          console.log('Join API response:', data);
+          const playerId = data.playerId;
+          navigate(`/play/session/${sessionId}/play/${playerId}`);
         })
-        .catch((err) => {
-          setError(err.message);
-        });
+        
     }
   };
 
