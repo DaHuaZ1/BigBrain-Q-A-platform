@@ -12,6 +12,7 @@ import GameJoinPage from './components/gameJoinPage';
 import SessionPage from './components/sessionPage';
 import GameWaitPage from './components/gameWaitPage';
 import GamePlayPage from './components/gamePlayPage';
+import GamePlayerResultPage from './components/gamePlayerResultPage';
 
 function App() {
   const[token, setToken]=useState(localStorage.getItem('token'));
@@ -32,6 +33,7 @@ function App() {
           <Route path="/play/session/:sessionId" element={<GameJoinPage />} />
           <Route path="/play/session/:sessionId/player/:playerId/wait" element={<GameWaitPage />} />
           <Route path="/play/session/:sessionId/player/:playerId/play" element={<GamePlayPage />} />
+          <Route path="/play/session/:sessionId/player/:playerId/result" element={<GamePlayerResultPage />} />
         </Routes>
 
       </BrowserRouter>

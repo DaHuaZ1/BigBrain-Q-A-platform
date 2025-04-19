@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { Typography, Button, Box } from '@mui/material';
 
 const GamePlayPage = () => {
-  const { playerId } = useParams();
+  const { playerId, sessionId } = useParams();
   const [questionData, setQuestionData] = useState(null);
   const [questionId, setQuestionId] = useState(null);
   const [error, setError] = useState(null);
@@ -12,6 +12,7 @@ const GamePlayPage = () => {
   const questionType = questionData?.type; 
   const [correctAnswers, setCorrectAnswers] = useState([]);
   const [showAnswer, setShowAnswer] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const pollInterval = setInterval(async () => {
@@ -21,13 +22,19 @@ const GamePlayPage = () => {
         const newQuestion = data.question;
   
         if (newQuestion.id !== questionId) {
-          console.log('🔄 New question detected! Updating UI...');
+          console.log('New question detected! Updating UI...');
           setQuestionData(newQuestion);
           setQuestionId(newQuestion.id);
           setCountdown(newQuestion.duration);
           setSelectedOptions([]);
           setCorrectAnswers([]);
           setShowAnswer(false);
+        }
+        const resStatus = await fetch(`http://localhost:5005/play/${playerId}/status`);
+        const dataStatus = await resStatus.json();
+        if (dataStatus.started === false) {
+          console.log('Game ended. Navigating to result page...');
+          navigate(`/play/session/${sessionId}/player/${playerId}/result`);
         }
       } catch (err) {
         console.error('Polling error:', err);
@@ -115,7 +122,7 @@ const GamePlayPage = () => {
     try {
       const res = await fetch(`http://localhost:5005/play/${playerId}/answer`);
       const data = await res.json();
-      console.log('✅ Raw response from /answer:', data);
+      console.log('Raw response from /answer:', data);
   
       if (!Array.isArray(data.answers)) {
         throw new Error('Invalid answer format from server');
