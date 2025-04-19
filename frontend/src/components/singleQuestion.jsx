@@ -62,7 +62,6 @@ const SingleQuestion = () => {
   };  
 
   const saveQuestion = () => {
-    // Validate required fields and auto-focus first invalid one
     if (!question.question.trim()) {
       questionRef.current.focus();
       return;
@@ -79,22 +78,31 @@ const SingleQuestion = () => {
       pointsRef.current.focus();
       return;
     }
-
+  
     const updatedQuestion = {
       ...question,
       duration: Math.max(0, question.duration),
       points: Math.max(0, question.points),
     };
-    const updatedQuestions = game.questions.map((q) => (q.id === question.id ? updatedQuestion : q));
-    const updatedGame = { ...game, questions: updatedQuestions };
-    putNewGame([updatedGame])
-      .then(() => {
-        setGame(updatedGame);
-        setQuestion(updatedQuestion);
-        console.log("Question updated successfully");
-        setSnackbar({ open: true, message: "Question updated successfully", severity: "success" });
-      })
-      .catch((error) => console.error("Error updating question:", error));
+  
+    fetchAllGames().then((data) => {
+      const allGames = data.games;
+      const updatedGame = {
+        ...game,
+        questions: game.questions.map(q => q.id === question.id ? updatedQuestion : q)
+      };
+      const updatedGameList = allGames.map(g => g.id === updatedGame.id ? updatedGame : g);
+  
+      putNewGame(updatedGameList)
+        .then(() => {
+          setGame(updatedGame);
+          setQuestion(updatedQuestion);
+          setSnackbar({ open: true, message: "Question updated successfully", severity: "success" });
+        })
+        .catch((error) => {
+          console.error("Error updating question:", error);
+        });
+    });
   };
 
   if (!question) return <div>Loading...</div>;
