@@ -1,8 +1,17 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Typography, Box, Divider } from '@mui/material';
+import { useParams, useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Stack,
+  Typography,
+  Box,
+  Divider,
+  Paper,
+  Button
+} from '@mui/material';
 
 const GamePlayerResultPage = () => {
+  const navigate = useNavigate();  
   const { playerId } = useParams();
   const [resultData, setResultData] = useState([]);
   const [error, setError] = useState(null);
@@ -46,29 +55,71 @@ const GamePlayerResultPage = () => {
   }, [playerId]);
 
   return (
-    <Box sx={{ padding: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Game Results
+    <Container maxWidth="sm" sx={{ py: 4 }}>
+      <Typography variant="h4" align="center" gutterBottom>
+      Game Results
       </Typography>
 
-      {error && <Typography color="error">{error}</Typography>}
+      {error && (
+        <Typography color="error" align="center" sx={{ mb: 2 }}>
+          {error}
+        </Typography>
+      )}
 
-      {resultData.map((r, i) => (
-        <Box key={i} sx={{ mb: 2 }}>
-          <Typography variant="h6">Question {r.qid}</Typography>
-          <Typography>Score for this question: {r.point}</Typography>
-          <Typography>Is it correct: {r.correct ? 'Yes' : 'No'}</Typography>
-          <Typography>
-            Answer time: {r.timeTaken !== null ? `${r.timeTaken} seconds` : 'N/A'}
-          </Typography>
-          <Divider sx={{ my: 1 }} />
+      <Stack spacing={2}>
+        {resultData.map((r, i) => (
+          <Paper key={i} elevation={2} sx={{ p: 2 }}>
+            <Typography variant="subtitle1" gutterBottom>
+              <strong>Question {r.qid}</strong>
+            </Typography>
+
+            <Typography variant="body2" color="text.secondary">
+            Score: <strong>{r.point}</strong>
+            </Typography>
+
+            <Typography
+              variant="body2"
+              color={r.correct ? 'success.main' : 'error.main'}
+            >
+            Result: <strong>{r.correct ? 'Correct' : 'Wrong'}</strong>
+            </Typography>
+
+            <Typography variant="body2" color="text.secondary">
+            Time: {r.timeTaken !== null ? `${r.timeTaken}s` : 'N/A'}
+            </Typography>
+          </Paper>
+        ))}
+      </Stack>
+
+      <Box sx={{ mt: 4 }}>
+        <Divider sx={{ mb: 2 }} />
+
+        <Typography variant="h5" align="center" gutterBottom>
+         Total Score: {totalScore}
+        </Typography>
+
+        <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+          <Button
+            variant="outlined"
+            onClick={() => navigate('/')}
+            sx={{
+              color: 'black',
+              borderColor: 'black',
+              '&:hover': {
+                backgroundColor: 'black',
+                color: 'white',
+              },
+              px: 4,
+              py: 1.2,
+              fontWeight: 'bold',
+              borderRadius: 2,
+            }}
+          >
+          Return Home Page
+          </Button>
         </Box>
-      ))}
-
-      <Typography variant="h5" sx={{ mt: 4 }}>
-        Total Score: {totalScore}
-      </Typography>
-    </Box>
+      </Box>
+    </Container>
   );
 };
 
