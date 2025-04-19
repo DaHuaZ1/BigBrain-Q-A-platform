@@ -15,6 +15,7 @@ import { fetchAllGames } from "../getAllGames";
 import { putNewGame } from "../putNewGame";
 import {MutateGameSession} from "../sessionAPI";
 
+
 const GameCard = (props) => {
   const games = props.games ?? [];
   const { enqueueSnackbar } = useSnackbar();
@@ -24,6 +25,8 @@ const GameCard = (props) => {
   const [targetGameId, setTargetGameId] = useState(null);
   const [sessionDialog, setSessionDialog] = useState({ open: false, sessionId: null });
   const [stopDialog, setStopDialog] = useState({ open: false, game: null });
+  const [resultDialog, setResultDialog] = useState({ open: false, game: null });
+
 
   const openConfirmDialog = (gameId) => {
     setTargetGameId(gameId);
@@ -71,7 +74,7 @@ const GameCard = (props) => {
       if (result.data?.status === "ended") {
         enqueueSnackbar("Game session ended", { variant: "info" });
         props.onDelete();
-        navigate(`/game/${game.id}/session/${game.active}`);
+        setResultDialog({ open: true, game });
       }
     } catch (err) {
       enqueueSnackbar("Failed to stop session",err, { variant: "error" });
@@ -233,6 +236,21 @@ const GameCard = (props) => {
           </Button>
         </DialogActions>
       </Dialog>
+
+      <Dialog open={resultDialog.open} onClose={() => setResultDialog({ open: false, sessionId: null })}>
+        <DialogTitle>Game Ended</DialogTitle>
+        <DialogContent>
+          <Typography>The game has ended. Would you like to view the results?</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setResultDialog({ open: false, sessionId: null })}>No</Button>
+          <Button color="primary" onClick={() => {
+            navigate(`/game/${resultDialog.game.id}/session/${resultDialog.game.active}`);
+            setResultDialog({ open: false, sessionId: null });
+          }}>Yes, show results</Button>
+        </DialogActions>
+      </Dialog>
+
     </Grid>
   );
 };
