@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 
 const CANVAS_SIZE = 300;
 const SCALE = 15;
-const SPEED = 100;
+const SPEED = 250;
 const DIRECTIONS = {
   ArrowUp: [0, -1],
   ArrowDown: [0, 1],
@@ -107,7 +107,7 @@ const GameSnake = () => {
         style={{ border: '2px solid #333' }}
       />
       <p>Score: {score}</p>
-      {gameOver && <p style={{ color: 'red' }}>Game Over! Refresh to play again.</p>}
+      {gameOver && <p style={{ color: 'red' }}>Game Over! Click Stop and then Try to replay the game.</p>}
     </div>
   );
 };
