@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 
 const GameWaitPage = () => {
-  const { playerId } = useParams();
+  const navigate = useNavigate();
+  const { playerId, sessionId } = useParams();
   const [gameStarted, setGameStarted] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -21,6 +22,8 @@ const GameWaitPage = () => {
             setGameStarted(true);
             //Stop polling if the game has started
             clearInterval(intervalId);
+
+            navigate(`/play/session/${sessionId}/player/${playerId}/play`);
           }
         })
         .catch((error) => {
@@ -46,7 +49,7 @@ const GameWaitPage = () => {
   return (
     <div>
       {gameStarted ? (
-        <div>Game Started!</div>
+        <div>Game Started! Redirecting to the game page...</div>
       ) : (
         <div>Waiting for the administrator to start the game...</div>
       )}
