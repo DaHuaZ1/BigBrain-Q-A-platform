@@ -219,27 +219,40 @@ const GamePlayPage = () => {
             {questionData.optionAnswers.map((option, index) => (
               <Button
                 key={index}
+                fullWidth
+                onClick={() => handleOptionClick(index)}
+                sx={{
+                  whiteSpace: 'normal',
+                  textAlign: 'left',
+                  pointerEvents: countdown === 0 || showAnswer ? 'none' : 'auto',
+                  opacity: 1
+                }}
                 variant={
-                  selectedOptions.includes(index)
-                    ? 'contained'
-                    : showAnswer && correctAnswers.includes(index)
+                  showAnswer
+                    ? correctAnswers.includes(index)
+                      ? 'contained'
+                      : selectedOptions.includes(index)
+                        ? 'contained'
+                        : 'outlined'
+                    : selectedOptions.includes(index)
                       ? 'contained'
                       : 'outlined'
                 }
                 color={
-                  selectedOptions.includes(index)
-                    ? 'primary'
-                    : showAnswer && correctAnswers.includes(index)
+                  showAnswer
+                    ? correctAnswers.includes(index)
                       ? 'success'
+                      : selectedOptions.includes(index)
+                        ? 'error'
+                        : 'inherit'
+                    : selectedOptions.includes(index)
+                      ? 'primary'
                       : 'inherit'
                 }
-                fullWidth
-                onClick={() => handleOptionClick(index)}
-                disabled={countdown === 0 || showAnswer}
-                sx={{ whiteSpace: 'normal', textAlign: 'left' }}
               >
                 {option}
               </Button>
+            
             ))}
           </Stack>
         </Stack>
