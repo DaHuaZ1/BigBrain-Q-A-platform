@@ -18,19 +18,54 @@ const GamePlayPage = () => {
     return url;
   };
 
-  const handleOptionClick = (index) => {
-    if (!questionType) return;
+  const submitAnswer = async (options) => {
+    const answers = options.map(index => questionData.optionAnswers[index]);
+    const body = JSON.stringify({ answers });
   
-    if (questionType === 'single' || questionType === 'judgement') {
-      setSelectedOptions(prev => prev[0] === index ? [] : [index]);
-    } else if (questionType === 'multiple') {
-      setSelectedOptions(prev =>
-        prev.includes(index)
-          ? prev.filter(i => i !== index)
-          : [...prev, index]
-      );
+    console.log('Submitting to:', `http://localhost:5005/play/${playerId}/answer`);
+    console.log('Payload:', body);
+  
+    try {
+      const response = await fetch(`http://localhost:5005/play/${playerId}/answer`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: body,
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server error text:', errorText);
+        throw new Error('Failed to submit answer');
+      }
+  
+      console.log('Answer submitted:', answers);
+    } catch (err) {
+      console.error('Submit error:', err);
     }
   };
+  
+  
+  
+
+  const handleOptionClick = (index) => {
+    if (!questionType || countdown === 0) return;
+  
+    let newSelection = [];
+  
+    if (questionType === 'single' || questionType === 'judgement') {
+      newSelection = selectedOptions[0] === index ? [] : [index];
+    } else if (questionType === 'multiple') {
+      newSelection = selectedOptions.includes(index)
+        ? selectedOptions.filter(i => i !== index)
+        : [...selectedOptions, index];
+    }
+  
+    setSelectedOptions(newSelection);
+    submitAnswer(newSelection);
+  };
+  
   
   
 
@@ -125,7 +160,7 @@ const GamePlayPage = () => {
             fullWidth
             color={selectedOptions.includes(index) ? 'primary' : 'inherit'}
             onClick={() => handleOptionClick(index)}
-            disabled={countdown === 0} // ⏳ 倒计时结束不能点
+            disabled={countdown === 0}
           >
             {option}
           </Button>
