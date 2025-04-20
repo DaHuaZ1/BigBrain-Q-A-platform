@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card, CardActions, CardContent, CardMedia, Button,
   Typography, Dialog, DialogActions, DialogTitle, Grid, Box,
@@ -26,7 +26,15 @@ const GameCard = (props) => {
   const [sessionDialog, setSessionDialog] = useState({ open: false, sessionId: null });
   const [stopDialog, setStopDialog] = useState({ open: false, game: null });
   const [resultDialog, setResultDialog] = useState({ open: false, game: null });
+  const [animatedCards, setAnimatedCards] = useState({});
 
+  useEffect(() => {
+    games.forEach((game, index) => {
+      setTimeout(() => {
+        setAnimatedCards(prev => ({ ...prev, [game.id]: true }));
+      }, index * 150 + 600);
+    });
+  }, [games]);
 
   const openConfirmDialog = (gameId) => {
     setTargetGameId(gameId);
@@ -81,16 +89,28 @@ const GameCard = (props) => {
     }
   };
 
-  const getAnimationStyle = (index) => ({
-    opacity: 0,
-    transform: "translateY(-20px)",
-    animation: `fadeSlideIn 0.6s ease forwards`,
-    animationDelay: `${index * 0.15}s`,
-    '@keyframes fadeSlideIn': {
-      from: { opacity: 0, transform: 'translateY(-20px)' },
-      to: { opacity: 1, transform: 'translateY(0)' },
-    }
-  });
+  const getAnimationStyle = (game, index) => {
+    const animated = animatedCards[game.id];
+  
+    return {
+      opacity: animated ? 1 : 0,
+      transform: animated ? "none" : "translateY(-20px)",
+      transition: "transform 0.3s, box-shadow 0.3s, opacity 0.6s ease",
+      ...(animated ? {
+        '&:hover': {
+          transform: "scale(1.03)",
+          boxShadow: 6,
+        }
+      } : {
+        animation: `fadeSlideIn 0.6s ease forwards`,
+        animationDelay: `${index * 0.15}s`,
+        '@keyframes fadeSlideIn': {
+          from: { opacity: 0, transform: 'translateY(-20px)' },
+          to: { opacity: 1, transform: 'translateY(0)' },
+        }
+      })
+    };
+  };  
   
   return (
     <Grid container spacing={3}>
@@ -129,12 +149,7 @@ const GameCard = (props) => {
           <Card
             sx={{
               width: "100%",
-              transition: "transform 0.3s, box-shadow 0.3s",
-              '&:hover': {
-                transform: "scale(1.03)",
-                boxShadow: 6,
-              },
-              ...getAnimationStyle(games.indexOf(game)),
+              ...getAnimationStyle(game, games.indexOf(game)),
             }}
           >
             <Box sx={{ position: "relative" }}>
