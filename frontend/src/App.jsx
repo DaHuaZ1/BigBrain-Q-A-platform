@@ -10,8 +10,7 @@ import { SnackbarProvider } from 'notistack';
 import SingleQuestion from './components/singleQuestion';
 import GameJoinPage from './components/gameJoinPage';
 import SessionPage from './components/sessionPage';
-import GameWaitPage from './components/gameWaitPage';
-import GamePlayPage from './components/gamePlayPage';
+import GameWaitAndPlayPage from './components/gameWaitAndPlayPage';
 import GamePlayerResultPage from './components/gamePlayerResultPage';
 
 function App() {
@@ -31,8 +30,7 @@ function App() {
           <Route path='/game/:game_id/session/:session_id' element={<SessionPage />} />
           <Route path="/play" element={<GameJoinPage />} />
           <Route path="/play/session/:sessionId" element={<GameJoinPage />} />
-          <Route path="/play/session/:sessionId/player/:playerId/wait" element={<GameWaitPage />} />
-          <Route path="/play/session/:sessionId/player/:playerId/play" element={<GamePlayPage />} />
+          <Route path="/play/session/:sessionId/player/:playerId/game" element={<GameWaitAndPlayPage />} />
           <Route path="/play/session/:sessionId/player/:playerId/result" element={<GamePlayerResultPage />} />
         </Routes>
 

@@ -7,7 +7,7 @@ import {
   Button
 } from '@mui/material';
 
-const GameWaitPage = () => {
+const GameWaitAndPlayPage = () => {
   const navigate = useNavigate();
   const { playerId, sessionId } = useParams();
   const [gameStarted, setGameStarted] = useState(false);
@@ -90,6 +90,6 @@ const GameWaitPage = () => {
   );
 };
 
-export default GameWaitPage;
+export default GameWaitAndPlayPage;
 
 
