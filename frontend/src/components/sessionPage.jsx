@@ -107,13 +107,18 @@ const SessionPage = () => {
     return resultsData
       .map((user) => {
         let total = 0;
+        let correctCount = 0;
         user.answers.forEach((a, index) => {
           if (a.correct) {
             const points = sessionData.questions[index]?.points ?? 0;
             total += points;
+            correctCount++;
           }
         });
-        return { name: user.name, score: total };
+        const badge = correctCount === user.answers.length ? "💯" : 
+          correctCount >= user.answers.length * 0.8 ? "🎯" : 
+            correctCount <= 1 ? "😴" : "";
+        return { name: user.name, score: total, badge };
       })
       .sort((a, b) => b.score - a.score)
       .slice(0, 5)
@@ -150,6 +155,60 @@ const SessionPage = () => {
         avgTime: avg?.toFixed(2) || 0,
       };
     });
+  };
+
+  const calculateAccuracyRanking = () => {
+    return resultsData.map((user) => {
+      const total = user.answers.length;
+      const correct = user.answers.filter((a) => a.correct).length;
+      return {
+        name: user.name,
+        accuracy: ((correct / total) * 100).toFixed(1) + "%",
+      };
+    }).sort((a, b) => parseFloat(b.accuracy) - parseFloat(a.accuracy));
+  };
+
+  const calculateFastestUsersPerQuestion = () => {
+    const questionCount = resultsData[0]?.answers?.length || 0;
+    return Array.from({ length: questionCount }).map((_, i) => {
+      let fastest = null;
+      let minTime = Infinity;
+      resultsData.forEach((user) => {
+        const a = user.answers[i];
+        if (a) {
+          const start = new Date(a.questionStartedAt);
+          const end = new Date(a.answeredAt);
+          const time = (end - start) / 1000;
+          if (time < minTime) {
+            minTime = time;
+            fastest = user.name;
+          }
+        }
+      });
+      return {
+        question: `Q${i + 1}`,
+        fastestUser: fastest,
+        time: minTime.toFixed(2) + "s",
+      };
+    });
+  };
+
+  const downloadCSV = () => {
+    const top5 = calculateUserScores();
+    const csv = [
+      ["Rank", "Name", "Score", "Badge"],
+      ...top5.map(u => [u.rank, u.name, u.score, u.badge])
+    ]
+      .map(row => row.join(","))
+      .join("\n");
+  
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.setAttribute("download", `session_${session_id}_ranking.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -252,13 +311,17 @@ const SessionPage = () => {
         width={900}
         style={{ borderRadius: 12, padding: 16 }}
       >
-        <Typography.Title level={4}>Top 5 Users</Typography.Title>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+          <Typography.Title level={4}>Top 5 Users</Typography.Title>
+          <Button onClick={downloadCSV}>Download CSV</Button>
+        </div>
         <Table
           dataSource={calculateUserScores()}
           columns={[
             { title: "#", render: (_, __, index) => index + 1 },
             { title: "Name", dataIndex: "name" },
             { title: "Score", dataIndex: "score" },
+            { title: "Badge", dataIndex: "badge" },
           ]}
           pagination={false}
           rowKey="name"
@@ -289,6 +352,31 @@ const SessionPage = () => {
             <Line type="monotone" dataKey="avgTime" stroke="#FFB140" />
           </LineChart>
         </ResponsiveContainer>
+
+        <Divider dashed style={{ marginTop: 24, marginBottom: 24 }} />
+        <Typography.Title level={5}>Top Accuracy Rankings</Typography.Title>
+        <Table
+          dataSource={calculateAccuracyRanking()}
+          columns={[
+            { title: "Name", dataIndex: "name" },
+            { title: "Accuracy", dataIndex: "accuracy" },
+          ]}
+          pagination={false}
+          rowKey="name"
+        />
+
+        <Divider dashed style={{ marginTop: 24, marginBottom: 24 }} />
+        <Typography.Title level={5}>Fastest Responders Per Question</Typography.Title>
+        <Table
+          dataSource={calculateFastestUsersPerQuestion()}
+          columns={[
+            { title: "Question", dataIndex: "question" },
+            { title: "User", dataIndex: "fastestUser" },
+            { title: "Time", dataIndex: "time" },
+          ]}
+          pagination={false}
+          rowKey="question"
+        />
 
         <div style={{ textAlign: "right", marginTop: 16 }}>
           <Button color="danger" variant="filled" onClick={() => setShowResultsModal(false)}>
