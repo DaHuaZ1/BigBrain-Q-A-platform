@@ -9,18 +9,30 @@ import {
   Button,
   Card,
   Typography,
-  Space,
   Divider,
   message,
   Modal,
   Table,
+  Tooltip,
 } from "antd";
 import {
-  ArrowLeftOutlined,
-  StopOutlined,
-  StepForwardOutlined,
+  HomeOutlined,
+  PoweroffOutlined,
+  PlayCircleOutlined,
+  AreaChartOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, LineChart, Line, CartesianGrid, ResponsiveContainer } from "recharts";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip as ReTooltip,
+  LineChart,
+  Line,
+  CartesianGrid,
+  ResponsiveContainer,
+} from "recharts";
 
 const SessionPage = () => {
   const { game_id, session_id } = useParams();
@@ -29,6 +41,8 @@ const SessionPage = () => {
   const [showResultsPrompt, setShowResultsPrompt] = useState(false);
   const [showResultsModal, setShowResultsModal] = useState(false);
   const [canViewResultsLater, setCanViewResultsLater] = useState(false);
+  const [loadingAdvance, setLoadingAdvance] = useState(false);
+  const [loadingEnd, setLoadingEnd] = useState(false);
   const navigate = useNavigate();
 
   const fetchStatus = async () => {
@@ -58,7 +72,7 @@ const SessionPage = () => {
       if (Array.isArray(res.results)) {
         setResultsData(res.results);
         setShowResultsModal(true);
-        setShowResultsPrompt(false); 
+        setShowResultsPrompt(false);
       }
     } catch (err) {
       console.error("Error fetching results", err);
@@ -71,6 +85,8 @@ const SessionPage = () => {
       return;
     }
     try {
+      if (type === "ADVANCE") setLoadingAdvance(true);
+      if (type === "END") setLoadingEnd(true);
       const res = await MutateGameSession(game_id, type);
       if (res.data?.status) {
         fetchStatus();
@@ -81,22 +97,27 @@ const SessionPage = () => {
     } catch (err) {
       message.error("Error mutating session");
       console.error(err);
+    } finally {
+      setLoadingAdvance(false);
+      setLoadingEnd(false);
     }
   };
 
   const calculateUserScores = () => {
-    return resultsData.map((user) => {
-      let total = 0;
-      user.answers.forEach((a, index) => {
-        if (a.correct) {
-          const points = sessionData.questions[index]?.points ?? 0;
-          total += points;
-        }
-      });
-      return { name: user.name, score: total };
-    })
+    return resultsData
+      .map((user) => {
+        let total = 0;
+        user.answers.forEach((a, index) => {
+          if (a.correct) {
+            const points = sessionData.questions[index]?.points ?? 0;
+            total += points;
+          }
+        });
+        return { name: user.name, score: total };
+      })
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5);
+      .slice(0, 5)
+      .map((user, i) => ({ ...user, rank: i + 1 }));
   };
 
   const calculateCorrectPercentagePerQuestion = () => {
@@ -132,53 +153,66 @@ const SessionPage = () => {
   };
 
   return (
-    <div style={{ maxWidth: 600, margin: "40px auto" }}>
-      <Card title="Game Session Control" variant={false} style={{ borderRadius: 12, boxShadow: "0 4px 12px rgba(0,0,0,0.1)" }}>
+    <div style={{ maxWidth: "95%", margin: "40px auto", padding: 20 }}>
+      <Card
+        title="Game Session Control"
+        hoverable
+        style={{ borderRadius: 16, boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)" }}
+      >
         <Typography.Paragraph><strong>Session ID:</strong> {session_id}</Typography.Paragraph>
         <Typography.Paragraph><strong>Current Position:</strong> {sessionData?.position}</Typography.Paragraph>
         <Typography.Paragraph><strong>Status:</strong> {sessionData?.active ? "Active" : "Ended"}</Typography.Paragraph>
 
-        <Divider />
+        <Divider dashed />
 
-        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-          <Button
-            type="primary"
-            icon={<StepForwardOutlined />}
-            block
-            onClick={() => mutate("ADVANCE")}
-            disabled={!sessionData?.active}
-          >
-            {sessionData?.position === -1 ? "Start Game" : "Next Question"}
-          </Button>
+        <div style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap", gap: 16 }}>
+          <Tooltip title="Start or advance the game">
+            <Button
+              type="primary"
+              shape="circle"
+              icon={<PlayCircleOutlined style={{ color: '#52c41a' }} />}
+              size="large"
+              loading={loadingAdvance}
+              onClick={() => mutate("ADVANCE")}
+              disabled={!sessionData?.active}
+              style={!sessionData?.active ? { backgroundColor: '#E2E2E2', borderColor: '#DADADA', color: '#d9d9d9' } : {}}
+            />
+          </Tooltip>
 
-          <Button
-            danger
-            icon={<StopOutlined />}
-            block
-            onClick={() => mutate("END")}
-            disabled={!sessionData?.active}
-          >
-            Stop Game
-          </Button>
+          <Tooltip title="Stop the game">
+            <Button
+              danger
+              shape="circle"
+              icon={<PoweroffOutlined style={{ color: '#ff4d4f' }} />}
+              size="large"
+              loading={loadingEnd}
+              onClick={() => mutate("END")}
+              disabled={!sessionData?.active}
+              style={!sessionData?.active ? { backgroundColor: '#E2E2E2', borderColor: '#DADADA', color: '#d9d9d9' } : {}}
+            />
+          </Tooltip>
 
           {!sessionData?.active && (
-            <Button
-              type="default"
-              block
-              onClick={fetchResults}
-            >
-              View Results
-            </Button>
+            <Tooltip title="View session results">
+              <Button
+                type="default"
+                shape="circle"
+                icon={<AreaChartOutlined style={{ color: '#1890ff' }} />}
+                size="large"
+                onClick={fetchResults}
+              />
+            </Tooltip>
           )}
 
-          <Button
-            icon={<ArrowLeftOutlined />}
-            onClick={() => navigate("/dashboard")}
-            block
-          >
-            Back to Dashboard
-          </Button>
-        </Space>
+          <Tooltip title="Back to dashboard">
+            <Button
+              shape="circle"
+              icon={<HomeOutlined style={{ color: '#8c8c8c' }} />}
+              size="large"
+              onClick={() => navigate("/dashboard")}
+            />
+          </Tooltip>
+        </div>
       </Card>
 
       <Modal
@@ -189,9 +223,26 @@ const SessionPage = () => {
           setCanViewResultsLater(true);
         }}
         closable={false}
-        okText="Sure"
-        cancelText="Maybe later"
-        title="The game has ended. Would you like to view the results?"
+        centered
+        title={
+          <>
+            <ExclamationCircleOutlined style={{ color: "#faad14", marginRight: 8 }} />
+            The game has ended. Would you like to view the results?
+          </>
+        }
+        footer={
+          <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
+            <Button key="cancel" color="danger" variant="solid" onClick={() => {
+              setShowResultsPrompt(false);
+              setCanViewResultsLater(true);
+            }}>
+              Maybe later
+            </Button>
+            <Button key="ok" color="cyan" variant="solid" onClick={fetchResults}>
+              Sure
+            </Button>
+          </div>
+        }
       />
 
       <Modal
@@ -199,43 +250,50 @@ const SessionPage = () => {
         footer={null}
         closable={false}
         width={900}
+        style={{ borderRadius: 12, padding: 16 }}
       >
         <Typography.Title level={4}>Top 5 Users</Typography.Title>
         <Table
           dataSource={calculateUserScores()}
-          columns={[{ title: "Name", dataIndex: "name" }, { title: "Score", dataIndex: "score" }]}
+          columns={[
+            { title: "#", render: (_, __, index) => index + 1 },
+            { title: "Name", dataIndex: "name" },
+            { title: "Score", dataIndex: "score" },
+          ]}
           pagination={false}
           rowKey="name"
         />
 
-        <Divider />
+        <Divider dashed style={{ marginTop: 24, marginBottom: 24 }} />
 
         <Typography.Title level={5}>Correct Answer Rate per Question (%)</Typography.Title>
-        <ResponsiveContainer width="100%" height={200}>
+        <ResponsiveContainer width="100%" height={250}>
           <BarChart data={calculateCorrectPercentagePerQuestion()}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="question" />
             <YAxis />
-            <Tooltip />
-            <Bar dataKey="correct" fill="#8884d8" />
+            <ReTooltip />
+            <Bar dataKey="correct" fill="#7A77FF" />
           </BarChart>
         </ResponsiveContainer>
 
-        <Divider />
+        <Divider dashed style={{ marginTop: 24, marginBottom: 24 }} />
 
         <Typography.Title level={5}>Average Response Time per Question (s)</Typography.Title>
-        <ResponsiveContainer width="100%" height={200}>
+        <ResponsiveContainer width="100%" height={250}>
           <LineChart data={calculateAvgResponseTime()}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="question" />
             <YAxis />
-            <Tooltip />
-            <Line type="monotone" dataKey="avgTime" stroke="#82ca9d" />
+            <ReTooltip />
+            <Line type="monotone" dataKey="avgTime" stroke="#FFB140" />
           </LineChart>
         </ResponsiveContainer>
 
         <div style={{ textAlign: "right", marginTop: 16 }}>
-          <Button onClick={() => setShowResultsModal(false)}>Close</Button>
+          <Button color="danger" variant="filled" onClick={() => setShowResultsModal(false)}>
+            Close
+          </Button>
         </div>
       </Modal>
     </div>
