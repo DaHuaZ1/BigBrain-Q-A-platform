@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Card, CardActions, CardContent, CardMedia, Button,
   Typography, Dialog, DialogActions, DialogTitle, Grid, Box,
@@ -14,6 +14,9 @@ import { useNavigate } from "react-router-dom";
 import { fetchAllGames } from "../getAllGames";
 import { putNewGame } from "../putNewGame";
 import {MutateGameSession} from "../sessionAPI";
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import StarIcon from '@mui/icons-material/Star';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
 
 const GameCard = (props) => {
@@ -26,7 +29,16 @@ const GameCard = (props) => {
   const [sessionDialog, setSessionDialog] = useState({ open: false, sessionId: null });
   const [stopDialog, setStopDialog] = useState({ open: false, game: null });
   const [resultDialog, setResultDialog] = useState({ open: false, game: null });
+  const [animatedCards, setAnimatedCards] = useState({});
+  const [detailDialog, setDetailDialog] = useState({ open: false, game: null, expand: false });
 
+  useEffect(() => {
+    games.forEach((game, index) => {
+      setTimeout(() => {
+        setAnimatedCards(prev => ({ ...prev, [game.id]: true }));
+      }, index * 150 + 600);
+    });
+  }, [games]);
 
   const openConfirmDialog = (gameId) => {
     setTargetGameId(gameId);
@@ -81,18 +93,92 @@ const GameCard = (props) => {
     }
   };
 
+  const getAnimationStyle = (game, index) => {
+    const animated = animatedCards[game.id];
+  
+    return {
+      opacity: animated ? 1 : 0,
+      transform: animated ? "none" : "translateY(-20px)",
+      transition: "transform 0.3s, box-shadow 0.3s, opacity 0.6s ease",
+      ...(animated ? {
+        '&:hover': {
+          transform: "scale(1.03)",
+          boxShadow: 6,
+        }
+      } : {
+        animation: `fadeSlideIn 0.6s ease forwards`,
+        animationDelay: `${index * 0.15}s`,
+        '@keyframes fadeSlideIn': {
+          from: { opacity: 0, transform: 'translateY(-20px)' },
+          to: { opacity: 1, transform: 'translateY(0)' },
+        }
+      })
+    };
+  };  
+  
+  const getDifficultyStars = (game) => {
+    const questions = game.questions;
+    if (!questions || questions.length === 0) {
+      return Array.from({ length: 6 }, (_, i) => (
+        <StarIcon key={i} sx={{ color: '#e0e0e0', fontSize: 28, mx: 0.5 }} />
+      ));
+    }
+  
+    const qCount = questions.length;
+    const totalTime = questions.reduce((sum, q) => sum + (q.duration || 0), 0);
+    const totalPoints = questions.reduce((sum, q) => sum + (q.points || 0), 0);
+  
+    const timePenalty = totalTime / 120;
+    const pointBonus = totalPoints / 10;
+  
+    const rawScore = (qCount - timePenalty + pointBonus) / 2;
+    const score = Math.max(1, Math.min(6, Math.ceil(rawScore)));
+  
+    return Array.from({ length: 6 }, (_, i) => (
+      <StarIcon key={i} sx={{ color: i < score ? '#fbc02d' : '#e0e0e0', fontSize: 28, mx: 0.5 }} />
+    ));
+  };  
+
   return (
     <Grid container spacing={3}>
+      {props.onAddGameClick && (
+        <Grid key="add-new" size={{xs:12,sm:6,md:3}}>
+          <Card
+            onClick={props.onAddGameClick}
+            sx={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              cursor: "pointer",
+              color: "#aaa",
+              border: "2px dashed #ccc",
+              transition: "all 0.3s ease",
+              '&:hover': {
+                borderColor: "#000",
+                color: "#000",
+                transform: "scale(1.03)",
+                boxShadow: 3,
+              },
+              minHeight: 260,
+            }}
+          >
+            <AddCircleOutlineIcon sx={{ fontSize: 40 }} />
+            <Typography variant="subtitle1" mt={1}>Add New Game</Typography>
+          </Card>
+        </Grid>
+      )}
+
       {games.map((game) => (
         <Grid key={game.id} size={{xs:12,sm:6,md:3}}>
           <Card
+            onClick={() => setDetailDialog({ open: true, game, expand: false })}
             sx={{
               width: "100%",
-              transition: "transform 0.3s, box-shadow 0.3s",
-              '&:hover': {
-                transform: "scale(1.03)",
-                boxShadow: 6,
-              },
+              cursor: 'pointer',
+              ...getAnimationStyle(game, games.indexOf(game)),
             }}
           >
             <Box sx={{ position: "relative" }}>
@@ -164,36 +250,6 @@ const GameCard = (props) => {
         </Grid>
       ))}
 
-      {props.onAddGameClick && (
-        <Grid size={{xs:12,sm:6,md:3}}>
-          <Card
-            onClick={props.onAddGameClick}
-            sx={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              cursor: "pointer",
-              color: "#aaa",
-              border: "2px dashed #ccc",
-              transition: "all 0.3s ease",
-              '&:hover': {
-                borderColor: "#000",
-                color: "#000",
-                transform: "scale(1.03)",
-                boxShadow: 3,
-              },
-              minHeight: 260,
-            }}
-          >
-            <AddCircleOutlineIcon sx={{ fontSize: 40 }} />
-            <Typography variant="subtitle1" mt={1}>Add New Game</Typography>
-          </Card>
-        </Grid>
-      )}
-
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>Are you sure you want to delete this game?</DialogTitle>
         <DialogActions>
@@ -251,6 +307,120 @@ const GameCard = (props) => {
         </DialogActions>
       </Dialog>
 
+      <Dialog
+        open={detailDialog.open}
+        onClose={() => setDetailDialog({ open: false, game: null, expand: false })}
+        maxWidth="sm"
+        fullWidth
+        scroll="paper"
+        sx={{
+          '& .MuiPaper-root': {
+            borderRadius: 4,
+            background: 'linear-gradient(to bottom, #f5f5f5, #ffffff)',
+            boxShadow: 6,
+          },
+        }}
+      >
+        <DialogTitle sx={{
+          fontWeight: 'bold',
+          textAlign: 'center',
+          fontSize: '1.8rem',
+          pt: 4,
+          color: '#333',
+          letterSpacing: 0.5,
+        }}>
+          {detailDialog.game?.name}
+        </DialogTitle>
+        <DialogContent sx={{ px: 4, pb: 3 }}>
+          <Typography variant="body1" sx={{ fontSize: '1.1rem', color: '#444', mb: 2, lineHeight: 1.6 }}>
+            <strong>{detailDialog.game?.name}</strong> contains
+            <strong> {detailDialog.game?.questions?.length ?? 0}</strong> questions with a total duration of
+            <strong> {detailDialog.game?.questions?.reduce((sum, q) => sum + (q.duration || 0), 0)} seconds</strong>.
+          </Typography>
+
+          <Button
+            variant="outlined"
+            endIcon={detailDialog.expand ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+            onClick={() => setDetailDialog(prev => ({ ...prev, expand: !prev.expand }))}
+            sx={{ mb: 2, textTransform: 'none', borderRadius: 3, fontWeight: 'medium' }}
+            fullWidth
+          >
+            {detailDialog.expand ? 'Hide Question List' : 'Show All Questions'}
+          </Button>
+
+          {detailDialog.expand && (
+            detailDialog.game?.questions?.length > 0 ? (
+              detailDialog.game.questions.map((q, i) => (
+                <Box
+                  key={i}
+                  sx={{
+                    mb: 1.5,
+                    p: 2,
+                    border: '1px solid #ddd',
+                    borderRadius: 3,
+                    backgroundColor: '#fff8e1',
+                    boxShadow: 1,
+                  }}
+                >
+                  <Typography variant="subtitle1" fontWeight="bold">
+                    Q{i + 1}: {q?.question || "Untitled"}
+                  </Typography>
+                  <Box mt={1}>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      Duration: {q.duration || 0} seconds
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      Type: {q.type || "N/A"}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      Points: {q.points ?? "N/A"}
+                    </Typography>
+                  </Box>
+                </Box>
+              ))
+            ) : (
+              <Typography
+                variant="body2"
+                sx={{
+                  fontStyle: 'italic',
+                  textAlign: 'center',
+                  color: '#999',
+                  mt: 2,
+                }}
+              >
+                The question list has not been set yet.
+              </Typography>
+            )
+          )}
+
+          <Box mt={4} textAlign="center">
+            <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, color: '#333' }}>
+              Difficulty Level
+            </Typography>
+            <Box display="flex" justifyContent="center">
+              {detailDialog.game && getDifficultyStars(detailDialog.game)}
+            </Box>
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
+          <Button
+            onClick={() => setDetailDialog({ open: false, game: null, expand: false })}
+            variant="contained"
+            sx={{ 
+              borderRadius: 3, 
+              px: 5, 
+              backgroundColor: '#e20f43',
+              transition: 'background-color 0.15s ease 0.1s, transform 0.15s ease 0.1s', 
+              '&:hover': { 
+                backgroundColor: '#2bcc1a',
+                transform: "scale(1.11)" 
+              },
+            }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Grid>
   );
 };
