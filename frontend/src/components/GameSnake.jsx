@@ -1,3 +1,9 @@
+// 🐍 Snake game logic inspired by: https://www.youtube.com/watch?v=Je0B3nHhKmM
+// Designed and implemented by Yuxin
+// 
+// Hi, Mingxuan, feel free to improve or adjust anything you think can be better!
+// Good luck and suggestions welcome anytime!
+
 import { useEffect, useRef, useState } from 'react';
 
 const CANVAS_SIZE = 300;

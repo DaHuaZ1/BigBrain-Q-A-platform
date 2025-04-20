@@ -17,6 +17,16 @@ const GamePlayerResultPage = () => {
   const [error, setError] = useState(null);
   const [totalScore, setTotalScore] = useState(0);
 
+  //Hi, Mingxuan
+  //Because the backend GET /play/{playerId}/results does NOT return a 'score' field.
+  //To work around this, I stored each question's ID and point value in localStorage during gameplay
+  //(inside GameWaitAndPlayPage), using a structure like: { [questionId]: points }.
+  //Then, in this component, I retrieve that localStorage data and combine it with the backend's
+  //returned answers (which include questionId and Iscorrect?) to compute and display the total score.
+  //Hope this logic helps when you're building the admin result view or the history page!
+  // Feel free to reach out if anything is unclear
+  //—— Yuxin
+
   useEffect(() => {
     const fetchResults = async () => {
       try {
