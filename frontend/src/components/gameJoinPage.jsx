@@ -34,7 +34,7 @@ const GameJoinPage = () => {
       setError('');
       console.log('Session ID:', sessionId);
       console.log('Name:', name);
-      // Jump to gamePlagPage
+      // Jump to gameWaitAndPlayPage
       fetch(`http://localhost:5005/play/join/${sessionId}`, {
         method: 'POST',
         headers: {
@@ -53,7 +53,7 @@ const GameJoinPage = () => {
         .then((data) => {
           console.log('Join API response:', data);
           const playerId = data.playerId;
-          navigate(`/play/session/${sessionId}/player/${playerId}/wait`);
+          navigate(`/play/session/${sessionId}/player/${playerId}/game`);
         })
         
     }
