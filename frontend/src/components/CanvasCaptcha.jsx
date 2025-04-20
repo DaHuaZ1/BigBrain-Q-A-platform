@@ -1,3 +1,7 @@
+//This CAPTCHA design idea is referenced at: https://www.bilibili.com/video/BV1T64y1f7kM.
+//Although I have implemented the logic and actual code, I think there is still a lot of room for optimization.
+//Mingxuan, my teammate, if you have any better suggestions, you can feel free to try to optimize it, I hope my notes are helpful.
+
 import { useRef, useEffect } from 'react';
 
 const CanvasCaptcha = ({ text }) => {
