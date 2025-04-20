@@ -81,8 +81,49 @@ const GameCard = (props) => {
     }
   };
 
+  const getAnimationStyle = (index) => ({
+    opacity: 0,
+    transform: "translateY(-20px)",
+    animation: `fadeSlideIn 0.6s ease forwards`,
+    animationDelay: `${index * 0.15}s`,
+    '@keyframes fadeSlideIn': {
+      from: { opacity: 0, transform: 'translateY(-20px)' },
+      to: { opacity: 1, transform: 'translateY(0)' },
+    }
+  });
+  
   return (
     <Grid container spacing={3}>
+      {props.onAddGameClick && (
+        <Grid key="add-new" size={{xs:12,sm:6,md:3}}>
+          <Card
+            onClick={props.onAddGameClick}
+            sx={{
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              cursor: "pointer",
+              color: "#aaa",
+              border: "2px dashed #ccc",
+              transition: "all 0.3s ease",
+              '&:hover': {
+                borderColor: "#000",
+                color: "#000",
+                transform: "scale(1.03)",
+                boxShadow: 3,
+              },
+              minHeight: 260,
+            }}
+          >
+            <AddCircleOutlineIcon sx={{ fontSize: 40 }} />
+            <Typography variant="subtitle1" mt={1}>Add New Game</Typography>
+          </Card>
+        </Grid>
+      )}
+
       {games.map((game) => (
         <Grid key={game.id} size={{xs:12,sm:6,md:3}}>
           <Card
@@ -93,6 +134,7 @@ const GameCard = (props) => {
                 transform: "scale(1.03)",
                 boxShadow: 6,
               },
+              ...getAnimationStyle(games.indexOf(game)),
             }}
           >
             <Box sx={{ position: "relative" }}>
@@ -163,36 +205,6 @@ const GameCard = (props) => {
           </Card>
         </Grid>
       ))}
-
-      {props.onAddGameClick && (
-        <Grid size={{xs:12,sm:6,md:3}}>
-          <Card
-            onClick={props.onAddGameClick}
-            sx={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              alignItems: "center",
-              cursor: "pointer",
-              color: "#aaa",
-              border: "2px dashed #ccc",
-              transition: "all 0.3s ease",
-              '&:hover': {
-                borderColor: "#000",
-                color: "#000",
-                transform: "scale(1.03)",
-                boxShadow: 3,
-              },
-              minHeight: 260,
-            }}
-          >
-            <AddCircleOutlineIcon sx={{ fontSize: 40 }} />
-            <Typography variant="subtitle1" mt={1}>Add New Game</Typography>
-          </Card>
-        </Grid>
-      )}
 
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>Are you sure you want to delete this game?</DialogTitle>
