@@ -30,3 +30,14 @@ export const FetchGameStatus = (sessionId) => {
     }
   }).then(handleResponse);
 };
+
+export const FetchGameResults = (sessionId) => {
+  return fetch(`http://localhost:5005/admin/session/${sessionId}/results`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${userToken()}`,
+    },
+  }).then(handleResponse);
+};
+
