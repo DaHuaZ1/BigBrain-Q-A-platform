@@ -27,11 +27,62 @@ const style = {
 const Dashboard = () => {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleClose = () => {
+    setOpen(false);
+    setName("");
+    setUploadName("");
+    setParsedQuestions([]);
+    setParsedThumbnail("");
+  };
   const [name, setName] = useState("");
   const [games, setGames] = useState([]);
+  const [uploadName, setUploadName] = useState("");
+  const [parsedQuestions, setParsedQuestions] = useState([]);
+  const [parsedThumbnail, setParsedThumbnail] = useState("");
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
+
+  const validateQuestions = (questions) => {
+    return questions.every(q =>
+      typeof q.question === 'string' &&
+      Array.isArray(q.optionAnswers) &&
+      Array.isArray(q.correctAnswers) &&
+      typeof q.duration === 'number' &&
+      typeof q.points === 'number' &&
+      typeof q.type === 'string' &&
+      typeof q.media === 'string' &&
+      typeof q.mediaMode === 'string' &&
+      typeof q.imageUploaded === 'boolean' &&
+      typeof q.imageData === 'string'
+    );
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.name.endsWith(".json")) {
+      enqueueSnackbar("Only .json files are supported.", { variant: "warning" });
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = JSON.parse(event.target.result);
+        if (!Array.isArray(data.questions) || !validateQuestions(data.questions)) {
+          enqueueSnackbar("Invalid file structure.", { variant: "error" });
+          return;
+        }
+        setParsedQuestions(data.questions);
+        if (data.name) setName(data.name);
+        if (data.thumbnail) setParsedThumbnail(data.thumbnail);
+        setUploadName(file.name);
+        enqueueSnackbar("File uploaded and validated.", { variant: "success" });
+      } catch (error) {
+        enqueueSnackbar("Failed to parse JSON.", { variant: "error" }, error);
+      }
+    };
+    reader.readAsText(file);
+  };
 
   const postNewGame = () => {
     const owner = localStorage.getItem(AUTH.USER_KEY);
@@ -41,15 +92,14 @@ const Dashboard = () => {
         const newGame = {
           owner: owner,
           name: name,
-          thumbnail:"",
-          questions: [],
+          thumbnail: parsedThumbnail || "",
+          questions: parsedQuestions.length > 0 ? parsedQuestions : [],
         };
         const newGameList = [...oldGame, newGame];
         return putNewGame(newGameList);
       })
-      .then(()=> {
+      .then(() => {
         handleClose();
-        setName("");
         getGames();
         enqueueSnackbar("Game created successfully", { variant: "success" });
       })
@@ -57,18 +107,18 @@ const Dashboard = () => {
         console.error("Error creating game:", error);
         enqueueSnackbar("Failed to create game", { variant: "error" });
       });
-  }
+  };
 
   const getGames = () => {
     fetchAllGames()
       .then((data) => {
         setGames(data.games);
-      })
-  }
+      });
+  };
 
   useEffect(() => {
     getGames();
-  }, [])
+  }, []);
 
   return (
     <Container maxWidth="lg" sx={{ mt: 4 }}>
@@ -111,16 +161,29 @@ const Dashboard = () => {
               Create New Game
             </Typography>
             <TextField
-              sx={{width: "100%"}}
+              sx={{ width: "100%", mb: 2 }}
               required
-              id="outlined-required"
               label="Game Name"
               onChange={(e) => setName(e.target.value)}
               value={name}
             />
+            <Button
+              component="label"
+              variant="outlined"
+              fullWidth
+              sx={{ mb: 1 }}
+            >
+              Upload Game File (.json)
+              <input type="file" accept=".json" hidden onChange={handleFileChange} />
+            </Button>
+            {uploadName && (
+              <Typography variant="body2" sx={{ fontStyle: 'italic', color: '#888', mb: 1 }}>
+                Uploaded: {uploadName}
+              </Typography>
+            )}
             <Button 
               sx={{
-                marginTop: "20px",
+                mt: 1,
                 width: "100%",
                 height: "50px",
                 fontSize: "18px",
@@ -134,9 +197,9 @@ const Dashboard = () => {
                 borderRadius: "8px",
                 border: "2px solid #000000",
                 transition: "all 0.3s ease",
-              }} 
-              variant="contained" 
-              onClick={() => postNewGame(name)}
+              }}
+              variant="contained"
+              onClick={postNewGame}
             >
               create
             </Button>
@@ -145,5 +208,6 @@ const Dashboard = () => {
       </Modal>
     </Container>
   );
-}
+};
+
 export default Dashboard;
