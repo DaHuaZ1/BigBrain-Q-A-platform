@@ -26,10 +26,8 @@ const GameWaitAndPlayPage = () => {
 
   const questionType = questionData?.type;
 
-  // Waiting polling
   useEffect(() => {
     let intervalId = null;
-
     const checkGameStatus = () => {
       fetch(`http://localhost:5005/play/${playerId}/status`)
         .then((res) => {
@@ -51,14 +49,12 @@ const GameWaitAndPlayPage = () => {
     };
 
     checkGameStatus();
-    intervalId = setInterval(checkGameStatus, 1000);//wait polling time 1000=1s
+    intervalId = setInterval(checkGameStatus, 1000);
     return () => clearInterval(intervalId);
   }, [playerId]);
 
-  // Game polling
   useEffect(() => {
     if (!gameStarted) return;
-
     const pollInterval = setInterval(async () => {
       try {
         const res = await fetch(`http://localhost:5005/play/${playerId}/question`);
@@ -83,7 +79,7 @@ const GameWaitAndPlayPage = () => {
       } catch (err) {
         console.error('error:', err.message || err);
       }
-    }, 1000);//game polling time 1000=1s
+    }, 1000);
 
     return () => clearInterval(pollInterval);
   }, [gameStarted, playerId, questionId, sessionId, navigate]);
@@ -119,12 +115,10 @@ const GameWaitAndPlayPage = () => {
       if (url.includes('youtube.com/shorts/')) {
         return url.replace('shorts/', 'embed/');
       }
-  
       if (url.includes('youtu.be/')) {
         const id = url.split('youtu.be/')[1].split('?')[0];
         return `https://www.youtube.com/embed/${id}`;
       }
-  
       if (url.includes('youtube.com/watch')) {
         const urlObj = new URL(url);
         const id = urlObj.searchParams.get('v');
@@ -133,8 +127,7 @@ const GameWaitAndPlayPage = () => {
     } catch (err) {
       console.error("Invalid media URL", err);
     }
-  
-    return url; // fallback
+    return url;
   };
 
   const submitAnswer = async (options) => {
@@ -183,7 +176,6 @@ const GameWaitAndPlayPage = () => {
 
   if (loading) {
     return <div>Loading game status...</div>;
-    //Just to make sure it's optimized (to make the page response smoother), because if the wait page doesn't finish rendering the admin advances the game page refresh will be raw. ---- but not really necessary
   }
 
   return (
@@ -222,7 +214,7 @@ const GameWaitAndPlayPage = () => {
                 ⏳ {countdown} seconds
               </Typography>
 
-              {questionData.media && (
+              {questionData.mediaMode === 'url' && questionData.media && (
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                   <iframe
                     width="100%"
@@ -230,6 +222,22 @@ const GameWaitAndPlayPage = () => {
                     src={transformMediaUrl(questionData.media)}
                     title="Question Media"
                     allowFullScreen
+                  />
+                </Box>
+              )}
+
+              {questionData.mediaMode === 'image' && questionData.imageData && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
+                  <img
+                    src={questionData.imageData}
+                    alt="Question"
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '400px',
+                      objectFit: 'contain',
+                      borderRadius: '8px',
+                      border: '1px solid #ccc',
+                    }}
                   />
                 </Box>
               )}
@@ -309,6 +317,3 @@ const GameWaitAndPlayPage = () => {
 };
 
 export default GameWaitAndPlayPage;
-
-
-
