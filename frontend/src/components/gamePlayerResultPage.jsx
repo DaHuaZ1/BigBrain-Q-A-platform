@@ -38,17 +38,23 @@ const GamePlayerResultPage = () => {
 
         const enriched = data.map((result, index) => {
           const qid = String(index + 1); 
-          const point = questionPoints[qid] ?? 0;
+          const point = questionPoints[qid]?.points ?? 0;
+          const duration = questionPoints[qid]?.duration ?? 0;
           const timeTaken = (new Date(result.answeredAt) - new Date(result.questionStartedAt)) / 1000;
 
+          let earnedScore = 0;
           if (result.correct) {
-            scoreSum += point;
+            const remaining = Math.max(0, duration - timeTaken);
+            earnedScore = parseFloat((point * (remaining / 60)).toFixed(1));
+            scoreSum += earnedScore;
           }
+
 
           return {
             ...result,
             qid,
             point,
+            earnedScore,
             timeTaken: isNaN(timeTaken) ? null : timeTaken.toFixed(2),
           };
         });
@@ -87,6 +93,10 @@ const GamePlayerResultPage = () => {
             Score: <strong>{r.point}</strong>
             </Typography>
 
+            <Typography variant="body2" color="primary">
+            Earned Score: <strong>{r.earnedScore}</strong>
+            </Typography>
+
             <Typography
               variant="body2"
               color={r.correct ? 'success.main' : 'error.main'}
@@ -107,6 +117,42 @@ const GamePlayerResultPage = () => {
         <Typography variant="h5" align="center" gutterBottom>
          Total Score: {totalScore}
         </Typography>
+
+        <Typography
+          variant="body2"
+          sx={{
+            backgroundColor: "#fff8c5",
+            border: "1px solid #ffe58f",
+            color: "#ad6800",
+            borderRadius: 2,
+            p: 1.5,
+            mt: 2,
+            mb: 3,
+            textAlign: 'center',
+            fontWeight: 500
+          }}
+        >
+          ⚠️ Score = Question Points x Remaining Time (in minutes). The faster you answer, the more you earn!
+        </Typography>
+
+        <Typography
+          variant="body2"
+          sx={{
+            backgroundColor: "#fefefe",
+            borderLeft: "4px solid #ffccc7",
+            borderRight: "4px solid #ffccc7",
+            color: "#cf1322",
+            borderRadius: 2,
+            p: 1.5,
+            mb: 3,
+            textAlign: 'center',
+            fontWeight: 500,
+            fontStyle: 'italic',
+          }}
+        >
+          ℹ️ You may get a score lower than the question points if question time is shorter than 1 minute.
+        </Typography>
+
 
         <Box sx={{ display: 'flex', justifyContent: 'center' }}>
           <Button

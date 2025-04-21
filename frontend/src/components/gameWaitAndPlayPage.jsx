@@ -73,7 +73,10 @@ const GameWaitAndPlayPage = () => {
           setCorrectAnswers([]);
           setShowAnswer(false);
           const stored = JSON.parse(localStorage.getItem('questionPoints') || '{}');
-          stored[newQuestion.id] = newQuestion.points ?? 0;
+          stored[newQuestion.id] = {
+            points: newQuestion.points ?? 0,
+            duration: newQuestion.duration ?? 0,
+          };
           localStorage.setItem('questionPoints', JSON.stringify(stored));
         }
       } catch (err) {

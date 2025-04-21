@@ -326,8 +326,11 @@ const SessionPage = () => {
           borderRadius: 8,
           marginBottom: 16,
         }}>
-          <Typography.Text type="warning">
+          <Typography.Text style={{display:"block"}} type="warning">
             ⚠️ Scores are calculated as: <strong>Question Points x Speed</strong> (speed = Remaining Time (The less time spent, the higher the score)).
+          </Typography.Text>
+          <Typography.Text type="warning">
+            ⚠️ Player may get a score lower than the question points if question time is shorter than 1 minute..
           </Typography.Text>
         </div>
 
