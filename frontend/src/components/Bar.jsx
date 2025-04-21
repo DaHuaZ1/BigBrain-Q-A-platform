@@ -1,41 +1,136 @@
+import { useEffect, useRef } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
-import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
-import { Link } from 'react-router-dom';
+import Switch from '@mui/material/Switch';
+import Tooltip from '@mui/material/Tooltip';
+import { Link, useNavigate } from 'react-router-dom';
+import LogoutIcon from '@mui/icons-material/Logout';
+import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
+import HowToRegIcon from '@mui/icons-material/HowToReg';
+
+const Eye = () => {
+  const pupilRef = useRef(null);
+  const eyeContainerRef = useRef(null);
+
+  useEffect(() => {
+    const movePupil = (e) => {
+      const eye = eyeContainerRef.current;
+      const pupil = pupilRef.current;
+      if (!eye || !pupil) return;
+
+      const rect = eye.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
+
+      const dx = e.clientX - centerX;
+      const dy = e.clientY - centerY;
+
+      const angle = Math.atan2(dy, dx);
+      const maxDistance = 10; 
+
+      const x = maxDistance * Math.cos(angle);
+      const y = maxDistance * Math.sin(angle);
+
+      pupil.style.transform = `translate(${x}px, ${y}px)`;
+    };
+
+    window.addEventListener('mousemove', movePupil);
+    return () => window.removeEventListener('mousemove', movePupil);
+  }, []);
+
+  return (
+    <Box
+      ref={eyeContainerRef}
+      sx={{
+        width: 28,
+        height: 28,
+        borderRadius: '50%',
+        backgroundColor: 'white',
+        border: '2px solid black',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        mx: 0.5
+      }}
+    >
+      <Box
+        ref={pupilRef}
+        sx={{
+          width: 10,
+          height: 10,
+          borderRadius: '50%',
+          backgroundColor: 'black',
+        }}
+      />
+    </Box>
+  );
+};
+
 const Bar = (props) => {
+  const navigate = useNavigate();
+
   const logout = () => {
     props.setToken(null);
     localStorage.removeItem('token');
     localStorage.removeItem('email');
-  }
+    localStorage.removeItem('questionPoints');
+    navigate('/');
+  };
+
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
-          <IconButton
-            size="large"
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            sx={{ mr: 2 }}
+          <Box sx={{ display: 'flex', mr: 2 }}>
+            <Eye />
+            <Eye />
+          </Box>
+
+          <Typography
+            variant="h5"
+            component="div"
+            sx={{
+              flexGrow: 1,
+              fontFamily: "'Pacifico', cursive",
+              fontWeight: 'bold',
+              textShadow: '2px 2px 4px #000000',
+              letterSpacing: 1,
+            }}
           >
-          </IconButton>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-          The bigbrain is crazy and fun!
+            bigbrain
           </Typography>
-          {props.token === null
-            ? <>
-              <Button color="inherit" component={Link} to="/login">Login</Button>
-              <Button color="inherit" component={Link} to="/signup">Signup</Button>
+
+          {props.token === null ? (
+            <>
+              <Tooltip title="Login">
+                <IconButton color="inherit" component={Link} to="/login">
+                  <MeetingRoomIcon />
+                </IconButton>
+              </Tooltip>
+              <Tooltip title="Signup">
+                <IconButton color="inherit" component={Link} to="/signup">
+                  <HowToRegIcon />
+                </IconButton>
+              </Tooltip>
             </>
-            : <Button color="inherit" onClick={logout} component={Link} to={"/"} >Logout</Button>
-          }
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant="body2">Logout</Typography>
+              <Switch
+                color="warning"
+                onChange={logout}
+                icon={<LogoutIcon />}
+                checkedIcon={<LogoutIcon />}
+              />
+            </Box>
+          )}
         </Toolbar>
       </AppBar>
     </Box>
   );
-}
+};
+
 export default Bar;
