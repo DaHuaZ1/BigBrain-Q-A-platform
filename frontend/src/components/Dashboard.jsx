@@ -10,6 +10,7 @@ import { putNewGame } from "../putNewGame";
 import AUTH from "../Constant";
 import GameCard from "./gameCard";
 import { useSnackbar } from "notistack";
+import { useNavigate } from "react-router-dom";
 
 const style = {
   position: 'absolute',
@@ -30,22 +31,20 @@ const Dashboard = () => {
   const [name, setName] = useState("");
   const [games, setGames] = useState([]);
   const { enqueueSnackbar } = useSnackbar();
+  const navigate = useNavigate();
 
   const postNewGame = () => {
     const owner = localStorage.getItem(AUTH.USER_KEY);
     fetchAllGames()
       .then((data) => {
         const oldGame = Array.isArray(data.games) ? data.games : [];
-        // create a new game object
         const newGame = {
           owner: owner,
           name: name,
           thumbnail:"",
           questions: [],
         };
-        // add the new game object to the old game array
         const newGameList = [...oldGame, newGame];
-        // update the game list in the database
         return putNewGame(newGameList);
       })
       .then(()=> {
@@ -75,14 +74,14 @@ const Dashboard = () => {
     <Container maxWidth="lg" sx={{ mt: 4 }}>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
         <Typography variant="h4" fontWeight="bold">
-                    Dashboard
+          Dashboard
         </Typography>
         <Button
           variant="contained"
-          onClick={handleOpen}
+          onClick={() => navigate('/game/history')}
           sx={{ height: "40px", fontWeight: "bold" }}
         >
-                    Create a New Game
+          View Past Sessions
         </Button>
       </Box>
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 2, p: 2, mb: 4, backgroundColor: "#fafafa" }}>
@@ -109,7 +108,7 @@ const Dashboard = () => {
               fontWeight: "bold",
               marginBottom: "20px",
             }}>
-                            Create New Game
+              Create New Game
             </Typography>
             <TextField
               sx={{width: "100%"}}
@@ -139,7 +138,7 @@ const Dashboard = () => {
               variant="contained" 
               onClick={() => postNewGame(name)}
             >
-                            create
+              create
             </Button>
           </Box>
         </Fade>
