@@ -115,20 +115,26 @@ const GameWaitAndPlayPage = () => {
   }, [countdown]);
 
   const transformMediaUrl = (url) => {
-    if (url.includes('youtube.com/shorts/')) {
-      return url.replace('shorts/', 'embed/');
-      //To Mingxuan: 
-      //Here is the transform logic for VideoMedia.
-      //I did this because the short video type doesn't seem to be able to be directly embedded directly into a website.
-      //But don't worry different Youtube videos should be able to be embedded directly.
-      //I only tested the short video,
-      //if you use other format video (such as normal video) when you test.
-      //And if it can't be played properly you can refer to my transform logic.
-      //Good luck!
-      //From, 
-      //Yuxin
+    try {
+      if (url.includes('youtube.com/shorts/')) {
+        return url.replace('shorts/', 'embed/');
+      }
+  
+      if (url.includes('youtu.be/')) {
+        const id = url.split('youtu.be/')[1].split('?')[0];
+        return `https://www.youtube.com/embed/${id}`;
+      }
+  
+      if (url.includes('youtube.com/watch')) {
+        const urlObj = new URL(url);
+        const id = urlObj.searchParams.get('v');
+        if (id) return `https://www.youtube.com/embed/${id}`;
+      }
+    } catch (err) {
+      console.error("Invalid media URL", err);
     }
-    return url;
+  
+    return url; // fallback
   };
 
   const submitAnswer = async (options) => {
