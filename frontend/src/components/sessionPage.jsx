@@ -110,7 +110,13 @@ const SessionPage = () => {
         user.answers.forEach((a, index) => {
           if (a.correct) {
             const points = sessionData.questions[index]?.points ?? 0;
-            total += points;
+            const duration = sessionData.questions[index]?.duration ?? 0;
+            const start = new Date(a.questionStartedAt);
+            const end = new Date(a.answeredAt);
+            const timeTaken = (end - start) / 1000;
+            const remainingTime = Math.max(0, duration - timeTaken);
+            const score = points * (remainingTime / 60);
+            total += parseFloat(score.toFixed(1));
             correctCount++;
           }
         });
@@ -312,6 +318,19 @@ const SessionPage = () => {
           <Typography.Title level={4}>Top 5 Users</Typography.Title>
           <Button onClick={downloadCSV}>Download CSV</Button>
         </div>
+
+        <div style={{
+          backgroundColor: '#fef5e1',
+          border: '1px solid rgb(242, 217, 136)',
+          padding: '8px 16px',
+          borderRadius: 8,
+          marginBottom: 16,
+        }}>
+          <Typography.Text type="warning">
+            ⚠️ Scores are calculated as: <strong>Question Points x Speed</strong> (speed = Remaining Time (The less time spent, the higher the score)).
+          </Typography.Text>
+        </div>
+
         <Table
           dataSource={calculateUserScores()}
           columns={[
