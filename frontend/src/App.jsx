@@ -12,6 +12,7 @@ import GameJoinPage from './components/gameJoinPage';
 import SessionPage from './components/sessionPage';
 import GameWaitAndPlayPage from './components/gameWaitAndPlayPage';
 import GamePlayerResultPage from './components/gamePlayerResultPage';
+import History from './components/History';
 
 function App() {
   const[token, setToken]=useState(localStorage.getItem('token'));
@@ -28,6 +29,7 @@ function App() {
           <Route path="/game/:game_id" element={<SingleGame />} />
           <Route path="/game/:game_id/question/:question_id" element={<SingleQuestion />} />
           <Route path='/game/:game_id/session/:session_id' element={<SessionPage />} />
+          <Route path="/game/history" element={<History />} />
           <Route path="/play" element={<GameJoinPage />} />
           <Route path="/play/session/:sessionId" element={<GameJoinPage />} />
           <Route path="/play/session/:sessionId/player/:playerId/game" element={<GameWaitAndPlayPage />} />
