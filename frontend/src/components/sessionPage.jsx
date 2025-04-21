@@ -40,7 +40,6 @@ const SessionPage = () => {
   const [resultsData, setResultsData] = useState([]);
   const [showResultsPrompt, setShowResultsPrompt] = useState(false);
   const [showResultsModal, setShowResultsModal] = useState(false);
-  const [canViewResultsLater, setCanViewResultsLater] = useState(false);
   const [loadingAdvance, setLoadingAdvance] = useState(false);
   const [loadingEnd, setLoadingEnd] = useState(false);
   const navigate = useNavigate();
@@ -279,7 +278,6 @@ const SessionPage = () => {
         onOk={fetchResults}
         onCancel={() => {
           setShowResultsPrompt(false);
-          setCanViewResultsLater(true);
         }}
         closable={false}
         centered
@@ -293,7 +291,6 @@ const SessionPage = () => {
           <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%' }}>
             <Button key="cancel" color="danger" variant="solid" onClick={() => {
               setShowResultsPrompt(false);
-              setCanViewResultsLater(true);
             }}>
               Maybe later
             </Button>
