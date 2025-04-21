@@ -174,7 +174,14 @@ const GameCard = (props) => {
       {games.map((game) => (
         <Grid key={game.id} size={{xs:12,sm:6,md:3}}>
           <Card
-            onClick={() => setDetailDialog({ open: true, game, expand: false })}
+            onClick={(e) => {
+              if (
+                e.target.closest('button') || 
+                e.target.closest('.MuiFab-root') || 
+                e.target.closest('.MuiButtonBase-root')
+              ) return;
+              setDetailDialog({ open: true, game, expand: false });
+            }}
             sx={{
               width: "100%",
               cursor: 'pointer',
