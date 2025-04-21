@@ -3,7 +3,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import { fetchAllGames } from "../getAllGames";
 import {
   Container, Typography, Box, TextField, Button, FormControl,
-  InputLabel, Select, MenuItem, Checkbox, IconButton, Paper, Divider
+  InputLabel, Select, MenuItem, Checkbox, IconButton, Paper, Divider,
+  Snackbar
 } from "@mui/material";
 import Delete from "@mui/icons-material/Delete";
 import { putNewGame } from "../putNewGame";
@@ -13,8 +14,8 @@ import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
-import Snackbar from "@mui/material/Snackbar";
 import MuiAlert from "@mui/material/Alert";
+import { Tabs, Tab } from "@mui/material";
 
 const Alert = React.forwardRef(function Alert(props, ref) {
   return <MuiAlert elevation={6} variant="filled" ref={ref} {...props} />;
@@ -24,6 +25,7 @@ const SingleQuestion = () => {
   const { game_id, question_id } = useParams();
   const [question, setQuestion] = useState(null);
   const [game, setGame] = useState(null);
+  const [uploadSnackbarOpen, setUploadSnackbarOpen] = useState(false);
   const navigate = useNavigate();
   const questionRef = useRef();
   const typeRef = useRef();
@@ -41,7 +43,13 @@ const SingleQuestion = () => {
         const foundQuestion = foundGame.questions.find((question) => question.id === parseInt(question_id));
         if (foundQuestion) {
           const options = foundQuestion.optionAnswers.length >= 2 ? foundQuestion.optionAnswers : ["", ""];
-          setQuestion({ ...foundQuestion, optionAnswers: options });
+          setQuestion({
+            ...foundQuestion,
+            optionAnswers: options,
+            mediaMode: foundQuestion.media ? "url" : foundQuestion.imageData ? "image" : "url",
+            imageUploaded: !!foundQuestion.imageData,
+            imageData: foundQuestion.imageData || "",
+          });
         }
       }
     });
@@ -55,8 +63,11 @@ const SingleQuestion = () => {
       duration: 0,
       points: 0,
       media: "",
+      imageData: "",
+      imageUploaded: false,
       optionAnswers: ["", ""],
       correctAnswers: [],
+      mediaMode: "url"
     });
     setSnackbar({ open: true, message: "Reset Form", severity: "info" });
   };  
@@ -78,13 +89,15 @@ const SingleQuestion = () => {
       pointsRef.current.focus();
       return;
     }
-  
+
     const updatedQuestion = {
       ...question,
       duration: Math.max(0, question.duration),
       points: Math.max(0, question.points),
+      media: question.mediaMode === "url" ? question.media : "",
+      imageData: question.mediaMode === "image" ? question.imageData : "",
     };
-  
+
     fetchAllGames().then((data) => {
       const allGames = data.games;
       const updatedGame = {
@@ -92,7 +105,7 @@ const SingleQuestion = () => {
         questions: game.questions.map(q => q.id === question.id ? updatedQuestion : q)
       };
       const updatedGameList = allGames.map(g => g.id === updatedGame.id ? updatedGame : g);
-  
+
       putNewGame(updatedGameList)
         .then(() => {
           setGame(updatedGame);
@@ -187,12 +200,72 @@ const SingleQuestion = () => {
             />
           </Box>
 
-          <TextField
-            label="YouTube URL (optional)"
-            value={question.media}
-            onChange={(e) => setQuestion({ ...question, media: e.target.value })}
-            fullWidth
-          />
+          <Tabs
+            value={question.mediaMode}
+            onChange={(e, newValue) => setQuestion({ ...question, mediaMode: newValue })}
+            textColor="primary"
+            indicatorColor="primary"
+            centered
+          >
+            <Tab value="url" label="YOUTUBE URL" />
+            <Tab value="image" label="IMAGE UPLOAD" />
+          </Tabs>
+
+          {question.mediaMode === "url" && (
+            <TextField
+              label="YouTube URL (optional)"
+              value={question.media}
+              onChange={(e) => setQuestion({ ...question, media: e.target.value })}
+              fullWidth
+            />
+          )}
+
+          {question.mediaMode === "image" && (
+            <Box display="flex" flexDirection="column" gap={2}>
+              <Typography sx={{ fontStyle: "italic", color: "rgba(135, 135, 135, 0.9)" }} variant="body1">Upload Image(optional):</Typography>
+              <Box display="flex" alignItems="center" gap={2}>
+                <Button
+                  variant="contained"
+                  component="label"
+                  size="medium"
+                >
+                  {question.imageUploaded ? "Re-upload" : "Upload"}
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files[0];
+                      if (file && file.type.startsWith("image/")) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          setQuestion({
+                            ...question,
+                            imageData: reader.result,
+                            imageUploaded: true,
+                          });
+                          setUploadSnackbarOpen(true);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                </Button>
+                {question.imageUploaded && (
+                  <Button
+                    variant="text"
+                    color="error"
+                    onClick={() => setQuestion({ ...question, imageData: "", imageUploaded: false })}
+                  >
+                    Remove Image
+                  </Button>
+                )}
+              </Box>
+              {question.imageUploaded && question.imageData && (
+                <img src={question.imageData} alt="Uploaded Preview" style={{ maxWidth: '100%', maxHeight: 200, borderRadius: 8 }} />
+              )}
+            </Box>
+          )}
 
           <Typography variant="h6" fontWeight="bold" sx={{ mt: 3 }}>Answer Options</Typography>
           {question.optionAnswers.map((answer, index) => (
@@ -299,6 +372,20 @@ const SingleQuestion = () => {
             </Button>
           </DialogActions>
         </Dialog>
+        <Snackbar
+          open={uploadSnackbarOpen}
+          autoHideDuration={3000}
+          onClose={() => setUploadSnackbarOpen(false)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        >
+          <Alert
+            onClose={() => setUploadSnackbarOpen(false)}
+            severity="success"
+            sx={{ width: "100%" }}
+          >
+            Image uploaded successfully
+          </Alert>
+        </Snackbar>
         <Snackbar
           open={snackbar.open}
           autoHideDuration={3000}
