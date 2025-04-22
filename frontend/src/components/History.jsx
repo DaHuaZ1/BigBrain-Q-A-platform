@@ -27,6 +27,15 @@ const History = () => {
           Back to Dashboard
         </Button>
       </Box>
+      {games.length === 0 && (
+        <Typography
+          variant="body1"
+          sx={{ textAlign: 'center', color: '#999', fontStyle: 'italic', mt: 6 }}
+        >
+          No session records available.
+        </Typography>
+      )}
+
       {games.map((game) => (
         <Box key={game.id} sx={{ mb: 4, border: '1px solid #ccc', borderRadius: 2, p: 2 }}> 
           <Typography variant="h6" fontWeight="bold">
