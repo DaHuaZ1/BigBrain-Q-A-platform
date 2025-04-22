@@ -7,7 +7,7 @@ import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Switch from '@mui/material/Switch';
 import Tooltip from '@mui/material/Tooltip';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import LogoutIcon from '@mui/icons-material/Logout';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
@@ -32,7 +32,7 @@ const Eye = () => {
       const dy = e.clientY - centerY;
 
       const angle = Math.atan2(dy, dx);
-      const maxDistance = 10; 
+      const maxDistance = 10;
 
       // Move the pupil within a circular boundary
       const x = maxDistance * Math.cos(angle);
@@ -58,7 +58,7 @@ const Eye = () => {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        mx: 0.5
+        mx: 0.5,
       }}
     >
       <Box
@@ -77,8 +77,13 @@ const Eye = () => {
 // Bar component: renders the top navigation bar with eyes, logo, and login/logout logic
 const Bar = (props) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === '/';
 
-  // Handle logout logic and redirect to homepage
+  // Use hour to determine theme
+  const hour = new Date().getHours();
+  const theme = (hour >= 19 || hour < 6) ? 'dark' : 'light';
+
   const logout = () => {
     props.setToken(null);
     localStorage.removeItem('token');
@@ -89,7 +94,18 @@ const Bar = (props) => {
 
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar
+        position="static"
+        sx={{
+          backgroundColor: isHome
+            ? (theme === 'dark' ? '#0d1b2a' : '#f5f7fa')
+            : undefined,
+          color: isHome
+            ? (theme === 'dark' ? '#ffffff' : '#000000')
+            : undefined,
+          boxShadow: isHome ? 'none' : undefined,
+        }}
+      >
         <Toolbar>
           {/* Render two animated eyes */}
           <Box sx={{ display: 'flex', mr: 2 }}>
@@ -105,7 +121,7 @@ const Bar = (props) => {
               flexGrow: 1,
               fontFamily: "'Pacifico', cursive",
               fontWeight: 'bold',
-              textShadow: '2px 2px 4px #000000',
+              textShadow: isHome ? 'none' : '2px 2px 4px #000000',
               letterSpacing: 1,
             }}
           >
