@@ -1,3 +1,4 @@
+// React and MUI imports
 import { useEffect, useRef } from 'react';
 import AppBar from '@mui/material/AppBar';
 import Box from '@mui/material/Box';
@@ -11,10 +12,12 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import HowToRegIcon from '@mui/icons-material/HowToReg';
 
+// Eye component: renders a single animated eye that follows the mouse
 const Eye = () => {
   const pupilRef = useRef(null);
   const eyeContainerRef = useRef(null);
 
+  // Handle pupil movement based on mouse position
   useEffect(() => {
     const movePupil = (e) => {
       const eye = eyeContainerRef.current;
@@ -31,6 +34,7 @@ const Eye = () => {
       const angle = Math.atan2(dy, dx);
       const maxDistance = 10; 
 
+      // Move the pupil within a circular boundary
       const x = maxDistance * Math.cos(angle);
       const y = maxDistance * Math.sin(angle);
 
@@ -42,6 +46,7 @@ const Eye = () => {
   }, []);
 
   return (
+    // Render eye (white circle) with a black pupil that follows the mouse
     <Box
       ref={eyeContainerRef}
       sx={{
@@ -69,9 +74,11 @@ const Eye = () => {
   );
 };
 
+// Bar component: renders the top navigation bar with eyes, logo, and login/logout logic
 const Bar = (props) => {
   const navigate = useNavigate();
 
+  // Handle logout logic and redirect to homepage
   const logout = () => {
     props.setToken(null);
     localStorage.removeItem('token');
@@ -84,11 +91,13 @@ const Bar = (props) => {
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
         <Toolbar>
+          {/* Render two animated eyes */}
           <Box sx={{ display: 'flex', mr: 2 }}>
             <Eye />
             <Eye />
           </Box>
 
+          {/* App title with custom font and text shadow */}
           <Typography
             variant="h5"
             component="div"
@@ -102,7 +111,8 @@ const Bar = (props) => {
           >
             bigbrain
           </Typography>
-
+          
+          {/* Render login/signup if not authenticated; otherwise show logout switch */}
           {props.token === null ? (
             <>
               <Tooltip title="Login">
