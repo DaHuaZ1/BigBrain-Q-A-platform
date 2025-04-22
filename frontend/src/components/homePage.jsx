@@ -1,12 +1,18 @@
+// React & Routing imports
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+// MUI components
 import Button from '@mui/material/Button';
 import Container from '@mui/material/Container';
 import Typography from '@mui/material/Typography';
 import Box from '@mui/material/Box';
+
+// Animation and particles
 import { motion } from 'framer-motion';
 import Particles from 'react-tsparticles';
 
+// List of tips to display randomly
 const tips = [
   "💡 Tip: Speed earns more points!",
   "🎯 Did you know? Correct streaks multiply your score.",
@@ -15,6 +21,7 @@ const tips = [
   "🔥 Fun fact: You can hover over questions to see time left."
 ];
 
+// Particle animation configuration depending on theme
 const particlesOptions = (theme = 'light') => ({
   background: {
     color: {
@@ -47,6 +54,7 @@ const particlesOptions = (theme = 'light') => ({
   detectRetina: true
 });
 
+// MouseTrail: a glowing cursor effect
 const MouseTrail = () => {
   useEffect(() => {
     const trail = document.createElement('div');
@@ -59,6 +67,7 @@ const MouseTrail = () => {
     trail.style.background = 'radial-gradient(circle, #ffffff88 0%, transparent 70%)';
     document.body.appendChild(trail);
 
+    // Update position as mouse moves
     const moveTrail = (e) => {
       trail.style.left = `${e.clientX}px`;
       trail.style.top = `${e.clientY}px`;
@@ -69,13 +78,17 @@ const MouseTrail = () => {
   return null;
 };
 
+// Main Home component
 const Home = (props) => {
   const navigate = useNavigate();
+
+  // Greeting and tip fetched from localStorage or set on first visit
   const [tip, setTip] = useState(localStorage.getItem('tip') || '');
   const [greeting, setGreeting] = useState(localStorage.getItem('greeting') || '');
-  const [theme, setTheme] = useState('light');
+  const [theme, setTheme] = useState('light'); // theme based on time of day
 
   useEffect(() => {
+    // Set greeting and random tip if not stored already
     if (!greeting || !tip) {
       const hour = new Date().getHours();
       const greet = hour < 12 ? 'Good Morning, Commander!' :
@@ -88,12 +101,14 @@ const Home = (props) => {
       setTip(randomTip);
     }
 
+    // Set theme based on current hour (light/dark mode)
     setTheme((() => {
       const hour = new Date().getHours();
       return (hour >= 19 || hour < 6) ? 'dark' : 'light';
     })());
   }, []);
 
+  // Navigation handlers
   const handleJoinClick = () => navigate('/play');
   const handleDashboardClick = () => navigate('/dashboard');
 
@@ -114,29 +129,32 @@ const Home = (props) => {
         overflow: 'hidden'
       }}
     >
-      {/* Background layer with z-index -1 */}
+      {/* Background animation layer */}
       <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: -1 }}>
         <Particles options={particlesOptions(theme)} />
         <MouseTrail />
       </Box>
 
-      {/* Foreground content */}
+      {/* Main animated content */}
       <motion.div
         initial={{ opacity: 0, y: 30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 1 }}
         style={{ zIndex: 1, position: 'relative' }}
       >
+        {/* Greeting based on time of day */}
         <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
           {greeting}
         </Typography>
 
+        {/* Conditional message based on login status */}
         <Typography variant="h6" sx={{ mb: 3 }}>
           {props.token === null
             ? 'What are you waiting for? Hurry up and join us!'
             : 'Welcome back, ready to start a new game?'}
         </Typography>
 
+        {/* Main button: Join or Dashboard */}
         <Button
           variant="contained"
           color="primary"
@@ -153,6 +171,7 @@ const Home = (props) => {
           {props.token === null ? 'Join a Game' : 'Go to Dashboard'}
         </Button>
 
+        {/* Display motivational tip */}
         <Typography variant="body2" sx={{ mt: 4, fontStyle: 'italic', color: 'gray' }}>
           {tip}
         </Typography>
