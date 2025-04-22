@@ -95,7 +95,7 @@ const Login = (props) => {
           required
           label="Email"
           fullWidth
-          // type="email"
+          type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           variant="outlined"
