@@ -18,12 +18,18 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import StarIcon from '@mui/icons-material/Star';
 import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 
-
+/**
+ * GameCard Component
+ * Displays a grid of game cards with functionality to start, stop, edit, and delete games
+ * Provides detailed views of games and manages game sessions
+ * @param {Object} props - Component props containing games array and callback functions
+ */
 const GameCard = (props) => {
   const games = props.games ?? [];
   const { enqueueSnackbar } = useSnackbar();
   const navigate = useNavigate();
 
+  // State for managing various dialogs and UI interactions
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [targetGameId, setTargetGameId] = useState(null);
   const [sessionDialog, setSessionDialog] = useState({ open: false, sessionId: null });
@@ -32,6 +38,10 @@ const GameCard = (props) => {
   const [animatedCards, setAnimatedCards] = useState({});
   const [detailDialog, setDetailDialog] = useState({ open: false, game: null, expand: false });
 
+  /**
+   * Creates staggered animation effect for cards when component mounts
+   * Each card appears with a slight delay for a cascading effect
+   */
   useEffect(() => {
     games.forEach((game, index) => {
       setTimeout(() => {
@@ -40,16 +50,29 @@ const GameCard = (props) => {
     });
   }, [games]);
 
+  /**
+   * Opens the confirmation dialog for game deletion
+   * @param {string} gameId - ID of the game to be deleted
+   */
   const openConfirmDialog = (gameId) => {
     setTargetGameId(gameId);
     setConfirmOpen(true);
   };
 
+  /**
+   * Handles confirmation of game deletion
+   * Closes the dialog and triggers the delete operation
+   */
   const handleConfirmDelete = () => {
     setConfirmOpen(false);
     deleteGame(targetGameId);
   };
 
+  /**
+   * Deletes a game from the backend
+   * Fetches current games, filters out the target game, and updates the backend
+   * @param {string} gameId - ID of the game to delete
+   */
   const deleteGame = (gameId) => {
     fetchAllGames()
       .then((data) => {
@@ -62,11 +85,15 @@ const GameCard = (props) => {
         enqueueSnackbar("Game deleted successfully", { variant: "success" });
       })
       .catch((error) => {
-        console.error("Error deleting game:", error);
-        enqueueSnackbar("Failed to delete game", { variant: "error" });
+        enqueueSnackbar("Failed to delete game", { variant: "error" },error);
       });
   };
 
+  /**
+   * Starts a game session for the specified game
+   * Makes API call to start session and shows session link dialog on success
+   * @param {Object} game - The game object to start a session for
+   */
   const handleStartSession = async (game) => {
     try {
       const result = await MutateGameSession(game.id, "START");
@@ -80,6 +107,11 @@ const GameCard = (props) => {
     }
   };
 
+  /**
+   * Stops an active game session
+   * Makes API call to end session and shows results dialog on success
+   * @param {Object} game - The game object with active session to stop
+   */
   const handleStopSession = async (game) => {
     try {
       const result = await MutateGameSession(game.id, "END");
@@ -93,6 +125,13 @@ const GameCard = (props) => {
     }
   };
 
+  /**
+   * Generates animation styles for each game card
+   * Creates a staggered fade-in animation and hover effects
+   * @param {Object} game - The game object for the card
+   * @param {number} index - The index of the game in the list
+   * @return {Object} Style object for the card
+   */
   const getAnimationStyle = (game, index) => {
     const animated = animatedCards[game.id];
   
@@ -116,6 +155,12 @@ const GameCard = (props) => {
     };
   };  
   
+  /**
+   * Calculates and displays difficulty rating as stars
+   * Uses question count, total time, and points to determine difficulty
+   * @param {Object} game - The game to calculate difficulty for
+   * @return {Array} Array of star components representing difficulty
+   */
   const getDifficultyStars = (game) => {
     const questions = game.questions;
     if (!questions || questions.length === 0) {
@@ -141,6 +186,7 @@ const GameCard = (props) => {
 
   return (
     <Grid container spacing={3}>
+      {/* "Add New Game" card, displayed only if onAddGameClick prop is provided */}
       {props.onAddGameClick && (
         <Grid key="add-new" size={{xs:12,sm:6,md:3}}>
           <Card
@@ -171,10 +217,12 @@ const GameCard = (props) => {
         </Grid>
       )}
 
+      {/* Game cards - one for each game in the games array */}
       {games.map((game) => (
         <Grid key={game.id} size={{xs:12,sm:6,md:3}}>
           <Card
             onClick={(e) => {
+              // Prevent detail dialog from opening when clicking buttons/action elements
               if (
                 e.target.closest('button') || 
                 e.target.closest('.MuiFab-root') || 
@@ -188,6 +236,7 @@ const GameCard = (props) => {
               ...getAnimationStyle(game, games.indexOf(game)),
             }}
           >
+            {/* Card header with game thumbnail and action buttons */}
             <Box sx={{ position: "relative" }}>
               <CardMedia
                 component="img"
@@ -195,6 +244,7 @@ const GameCard = (props) => {
                 height="140"
                 image={game.thumbnail || defImg}
               />
+              {/* Different action buttons based on game session status */}
               {game.active ? (
                 <>
                   <Tooltip title="Go to Session">
@@ -232,6 +282,7 @@ const GameCard = (props) => {
               )}
             </Box>
 
+            {/* Card content with game details */}
             <CardContent>
               <Typography gutterBottom variant="h6" component="div" noWrap>
                 {game.name}
@@ -249,6 +300,8 @@ const GameCard = (props) => {
                 </Typography>
               </Box>
             </CardContent>
+            
+            {/* Card action buttons */}
             <CardActions sx={{ justifyContent: "space-between" }}>
               <Button size="small" onClick={() => navigate(`/game/${game.id}`)}>Edit Game</Button>
               <Button size="small" color="error" onClick={() => openConfirmDialog(game.id)}>Delete</Button>
@@ -257,6 +310,7 @@ const GameCard = (props) => {
         </Grid>
       ))}
 
+      {/* Delete confirmation dialog */}
       <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
         <DialogTitle>Are you sure you want to delete this game?</DialogTitle>
         <DialogActions>
@@ -265,6 +319,7 @@ const GameCard = (props) => {
         </DialogActions>
       </Dialog>
 
+      {/* Session started dialog with shareable link */}
       <Dialog open={sessionDialog.open} onClose={() => setSessionDialog({ open: false })}>
         <DialogTitle>Session Started</DialogTitle>
         <DialogContent>
@@ -287,6 +342,7 @@ const GameCard = (props) => {
         </DialogContent>
       </Dialog>
 
+      {/* Stop session confirmation dialog */}
       <Dialog open={stopDialog.open} onClose={() => setStopDialog({ open: false, game: null })}>
         <DialogTitle>Stop Game Session</DialogTitle>
         <DialogActions sx={{ justifyContent: "space-between", padding: "16px" }}>
@@ -300,6 +356,7 @@ const GameCard = (props) => {
         </DialogActions>
       </Dialog>
 
+      {/* Game results dialog after stopping a session */}
       <Dialog open={resultDialog.open} onClose={() => setResultDialog({ open: false, sessionId: null })}>
         <DialogTitle>Game Ended</DialogTitle>
         <DialogContent>
@@ -314,6 +371,7 @@ const GameCard = (props) => {
         </DialogActions>
       </Dialog>
 
+      {/* Detailed game information dialog with expandable questions list */}
       <Dialog
         open={detailDialog.open}
         onClose={() => setDetailDialog({ open: false, game: null, expand: false })}
@@ -339,12 +397,14 @@ const GameCard = (props) => {
           {detailDialog.game?.name}
         </DialogTitle>
         <DialogContent sx={{ px: 4, pb: 3 }}>
+          {/* Game summary information */}
           <Typography variant="body1" sx={{ fontSize: '1.1rem', color: '#444', mb: 2, lineHeight: 1.6 }}>
             <strong>{detailDialog.game?.name}</strong> contains
             <strong> {detailDialog.game?.questions?.length ?? 0}</strong> questions with a total duration of
             <strong> {detailDialog.game?.questions?.reduce((sum, q) => sum + (q.duration || 0), 0)} seconds</strong>.
           </Typography>
 
+          {/* Toggle button to show/hide questions list */}
           <Button
             variant="outlined"
             endIcon={detailDialog.expand ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -355,6 +415,7 @@ const GameCard = (props) => {
             {detailDialog.expand ? 'Hide Question List' : 'Show All Questions'}
           </Button>
 
+          {/* Expandable questions list */}
           {detailDialog.expand && (
             detailDialog.game?.questions?.length > 0 ? (
               detailDialog.game.questions.map((q, i) => (
@@ -400,6 +461,7 @@ const GameCard = (props) => {
             )
           )}
 
+          {/* Game difficulty stars display */}
           <Box mt={4} textAlign="center">
             <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 600, color: '#333' }}>
               Difficulty Level
@@ -409,6 +471,8 @@ const GameCard = (props) => {
             </Box>
           </Box>
         </DialogContent>
+        
+        {/* Dialog close button with animation effects */}
         <DialogActions sx={{ justifyContent: 'center', pb: 3 }}>
           <Button
             onClick={() => setDetailDialog({ open: false, game: null, expand: false })}
