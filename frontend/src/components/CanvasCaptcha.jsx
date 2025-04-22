@@ -50,6 +50,7 @@ const CanvasCaptcha = ({ text }) => {
 
   return (
     <canvas
+      role="img"
       ref={canvasRef}
       width={100}
       height={40}
