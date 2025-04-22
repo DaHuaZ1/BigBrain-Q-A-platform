@@ -11,6 +11,8 @@ import AUTH from "../Constant";
 import GameCard from "./gameCard";
 import { useSnackbar } from "notistack";
 import { useNavigate } from "react-router-dom";
+import SearchIcon from '@mui/icons-material/Search';
+import InputAdornment from '@mui/material/InputAdornment';
 
 const style = {
   position: 'absolute',
@@ -40,6 +42,7 @@ const Dashboard = () => {
   const [parsedQuestions, setParsedQuestions] = useState([]);
   const [parsedThumbnail, setParsedThumbnail] = useState("");
   const { enqueueSnackbar } = useSnackbar();
+  const [searchTerm, setSearchTerm] = useState('');
   const navigate = useNavigate();
 
   const validateQuestions = (questions) => {
@@ -56,6 +59,10 @@ const Dashboard = () => {
       typeof q.imageData === 'string'
     );
   };
+
+  const filteredGames = games.filter((game) =>
+    game.name?.toLowerCase().includes(searchTerm.toLowerCase())
+  );  
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -126,6 +133,31 @@ const Dashboard = () => {
         <Typography variant="h4" fontWeight="bold">
           Dashboard
         </Typography>
+        <TextField
+          variant="outlined"
+          size="small"
+          placeholder="Search Game by Name"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          sx={{
+            width: 300,
+            '& .MuiOutlinedInput-root': {
+              borderRadius: '9999px',
+              backgroundColor: '#fff',
+              paddingLeft: '8px',
+            },
+            '& input': {
+              paddingLeft: 0,
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
+            ),
+          }}
+        />
         <Button
           variant="contained"
           onClick={() => navigate('/game/history')}
@@ -135,7 +167,7 @@ const Dashboard = () => {
         </Button>
       </Box>
       <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 2, p: 2, mb: 4, backgroundColor: "#fafafa" }}>
-        <GameCard games={games} onDelete={getGames} onAddGameClick={handleOpen} />
+        <GameCard games={filteredGames} onDelete={getGames} onAddGameClick={handleOpen} />
       </Box>
 
       <Modal
