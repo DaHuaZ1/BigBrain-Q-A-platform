@@ -143,12 +143,25 @@ const Home = (props) => {
         style={{ zIndex: 1, position: 'relative' }}
       >
         {/* Greeting based on time of day */}
-        <Typography variant="h4" sx={{ fontWeight: 'bold', mb: 2 }}>
+        <Typography
+          variant="h4"
+          sx={{
+            fontWeight: 'bold',
+            mb: 2,
+            color: theme === 'dark' ? '#ffffff' : '#000000'
+          }}
+        >
           {greeting}
         </Typography>
 
         {/* Conditional message based on login status */}
-        <Typography variant="h6" sx={{ mb: 3 }}>
+        <Typography
+          variant="h6"
+          sx={{
+            mb: 3,
+            color: theme === 'dark' ? '#dddddd' : '#333333'
+          }}
+        >
           {props.token === null
             ? 'What are you waiting for? Hurry up and join us!'
             : 'Welcome back, ready to start a new game?'}
@@ -157,11 +170,13 @@ const Home = (props) => {
         {/* Main button: Join or Dashboard */}
         <Button
           variant="contained"
-          color="primary"
+          color={theme === 'dark' ? 'secondary' : 'primary'}
           onClick={props.token === null ? handleJoinClick : handleDashboardClick}
           sx={{
             minWidth: '200px',
             transition: 'transform 0.3s, box-shadow 0.3s',
+            backgroundColor: theme === 'dark' ? '#90caf9' : undefined,
+            color: theme === 'dark' ? '#000' : undefined,
             '&:hover': {
               transform: 'scale(1.08)',
               boxShadow: '0 0 12px 4px rgba(0, 123, 255, 0.5)'
@@ -172,7 +187,14 @@ const Home = (props) => {
         </Button>
 
         {/* Display motivational tip */}
-        <Typography variant="body2" sx={{ mt: 4, fontStyle: 'italic', color: 'gray' }}>
+        <Typography
+          variant="body2"
+          sx={{
+            mt: 4,
+            fontStyle: 'italic',
+            color: theme === 'dark' ? '#bbbbbb' : 'gray'
+          }}
+        >
           {tip}
         </Typography>
       </motion.div>
