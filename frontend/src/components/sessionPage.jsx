@@ -1,10 +1,15 @@
+// Import necessary React hooks and router utilities
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+
+// Import session-related API functions
 import {
   MutateGameSession,
   FetchGameStatus,
   FetchGameResults,
 } from "../sessionAPI";
+
+// Import Ant Design components and icons for UI
 import {
   Button,
   Card,
@@ -22,6 +27,8 @@ import {
   AreaChartOutlined,
   ExclamationCircleOutlined,
 } from "@ant-design/icons";
+
+// Import chart components from Recharts
 import {
   BarChart,
   Bar,
@@ -35,49 +42,60 @@ import {
 } from "recharts";
 
 const SessionPage = () => {
+  // Get session and game IDs from URL
   const { game_id, session_id } = useParams();
+
+  // State variables for session and result data
   const [sessionData, setSessionData] = useState(null);
   const [resultsData, setResultsData] = useState([]);
+
+  // Modal control states
   const [showResultsPrompt, setShowResultsPrompt] = useState(false);
   const [showResultsModal, setShowResultsModal] = useState(false);
+
+  // Loading states for game control buttons
   const [loadingAdvance, setLoadingAdvance] = useState(false);
   const [loadingEnd, setLoadingEnd] = useState(false);
+
   const navigate = useNavigate();
 
+  // Fetch current session status and check if session is active
   const fetchStatus = async () => {
     try {
       const result = await FetchGameStatus(session_id);
       if (result.results) {
         setSessionData(result.results);
         if (!result.results.active) {
-          setShowResultsPrompt(true);
+          setShowResultsPrompt(true); // Prompt if session already ended
         }
       } else {
         message.error("No session data found");
       }
     } catch (error) {
-      console.error("Error fetching session status:", error);
-      message.error("Failed to fetch session status");
+      message.error("Failed to fetch session status", error);
     }
   };
 
+  // Initial session status fetch on page load
   useEffect(() => {
     fetchStatus();
   }, []);
 
+  // Fetch full game results
   const fetchResults = async () => {
     try {
       const res = await FetchGameResults(session_id);
       if (Array.isArray(res.results)) {
         setResultsData(res.results);
-        setShowResultsModal(true);
-        setShowResultsPrompt(false);
+        setShowResultsModal(true); // Show results modal
+        setShowResultsPrompt(false); // Hide prompt
       }
-    } catch (err) {
-      console.error("Error fetching results", err);
+    } catch (_) {
+      // Silently ignore errors
     }
   };
 
+  // Trigger session mutations (advance or end game)
   const mutate = async (type) => {
     if (!sessionData?.active) {
       message.warning("No active session, cannot mutate.");
@@ -88,20 +106,20 @@ const SessionPage = () => {
       if (type === "END") setLoadingEnd(true);
       const res = await MutateGameSession(game_id, type);
       if (res.data?.status) {
-        fetchStatus();
+        fetchStatus(); // Refresh session state
         message.success(`${type} successful!`);
       } else {
         message.error("Mutation failed");
       }
     } catch (err) {
-      message.error("Error mutating session");
-      console.error(err);
+      message.error("Error mutating session", err);
     } finally {
       setLoadingAdvance(false);
       setLoadingEnd(false);
     }
   };
 
+  // Generate scores for top users based on remaining time
   const calculateUserScores = () => {
     return resultsData
       .map((user) => {
@@ -130,6 +148,7 @@ const SessionPage = () => {
       .map((user, i) => ({ ...user, rank: i + 1 }));
   };
 
+  // Compute percentage of correct answers per question
   const calculateCorrectPercentagePerQuestion = () => {
     const totalUsers = resultsData.length;
     const questionCount = resultsData[0]?.answers?.length || 0;
@@ -142,6 +161,7 @@ const SessionPage = () => {
     });
   };
 
+  // Compute average response time per question
   const calculateAvgResponseTime = () => {
     const questionCount = resultsData[0]?.answers?.length || 0;
     return Array.from({ length: questionCount }).map((_, i) => {
@@ -162,6 +182,7 @@ const SessionPage = () => {
     });
   };
 
+  // Compute accuracy ranking for each user
   const calculateAccuracyRanking = () => {
     return resultsData.map((user) => {
       const total = user.answers.length;
@@ -173,6 +194,7 @@ const SessionPage = () => {
     }).sort((a, b) => parseFloat(b.accuracy) - parseFloat(a.accuracy));
   };
 
+  // Find fastest user per question
   const calculateFastestUsersPerQuestion = () => {
     const questionCount = resultsData[0]?.answers?.length || 0;
     return Array.from({ length: questionCount }).map((_, i) => {
@@ -198,6 +220,7 @@ const SessionPage = () => {
     });
   };
 
+  // Export top 5 users as CSV file
   const downloadCSV = () => {
     const top5 = calculateUserScores();
     const csv = [
@@ -216,19 +239,23 @@ const SessionPage = () => {
     document.body.removeChild(link);
   };
 
+  // Return JSX layout for Session Page UI
   return (
     <div style={{ maxWidth: "95%", margin: "40px auto", padding: 20 }}>
+      {/* Session Control Panel */}
       <Card
         title="Game Session Control"
         hoverable
         style={{ borderRadius: 16, boxShadow: "0 6px 20px rgba(0, 0, 0, 0.1)" }}
       >
+        {/* Session metadata */}
         <Typography.Paragraph><strong>Session ID:</strong> {session_id}</Typography.Paragraph>
         <Typography.Paragraph><strong>Current Position:</strong> {sessionData?.position}</Typography.Paragraph>
         <Typography.Paragraph><strong>Status:</strong> {sessionData?.active ? "Active" : "Ended"}</Typography.Paragraph>
 
         <Divider dashed />
 
+        {/* Session action buttons: advance, end, view results, back */}
         <div style={{ display: "flex", justifyContent: "space-around", flexWrap: "wrap", gap: 16 }}>
           <Tooltip title="Start or advance the game">
             <Button
@@ -279,6 +306,7 @@ const SessionPage = () => {
         </div>
       </Card>
 
+      {/* Modal prompting user to view results */}
       <Modal
         open={showResultsPrompt}
         onOk={fetchResults}
@@ -307,6 +335,7 @@ const SessionPage = () => {
         }
       />
 
+      {/* Modal displaying full session results */}
       <Modal
         open={showResultsModal}
         footer={null}
@@ -319,6 +348,7 @@ const SessionPage = () => {
           <Button onClick={downloadCSV}>Download CSV</Button>
         </div>
 
+        {/* Score calculation notes */}
         <div style={{
           backgroundColor: '#fef5e1',
           border: '1px solid rgb(242, 217, 136)',
@@ -330,10 +360,11 @@ const SessionPage = () => {
             ⚠️ Scores are calculated as: <strong>Question Points x Speed</strong> (speed = Remaining Time (The less time spent, the higher the score)).
           </Typography.Text>
           <Typography.Text type="warning">
-            ⚠️ Player may get a score lower than the question points if question time is shorter than 1 minute..
+            ⚠️ Player may get a score lower than the question points if question time is shorter than 1 minute.
           </Typography.Text>
         </div>
 
+        {/* User rankings */}
         <Table
           dataSource={calculateUserScores()}
           columns={[
@@ -348,6 +379,7 @@ const SessionPage = () => {
 
         <Divider dashed style={{ marginTop: 24, marginBottom: 24 }} />
 
+        {/* Correct rate bar chart */}
         <Typography.Title level={5}>Correct Answer Rate per Question (%)</Typography.Title>
         <ResponsiveContainer width="100%" height={250}>
           <BarChart data={calculateCorrectPercentagePerQuestion()}>
@@ -361,6 +393,7 @@ const SessionPage = () => {
 
         <Divider dashed style={{ marginTop: 24, marginBottom: 24 }} />
 
+        {/* Avg response time line chart */}
         <Typography.Title level={5}>Average Response Time per Question (s)</Typography.Title>
         <ResponsiveContainer width="100%" height={250}>
           <LineChart data={calculateAvgResponseTime()}>
@@ -373,6 +406,8 @@ const SessionPage = () => {
         </ResponsiveContainer>
 
         <Divider dashed style={{ marginTop: 24, marginBottom: 24 }} />
+
+        {/* Accuracy table */}
         <Typography.Title level={5}>Top Accuracy Rankings</Typography.Title>
         <Table
           dataSource={calculateAccuracyRanking()}
@@ -385,6 +420,8 @@ const SessionPage = () => {
         />
 
         <Divider dashed style={{ marginTop: 24, marginBottom: 24 }} />
+
+        {/* Fastest responders table */}
         <Typography.Title level={5}>Fastest Responders Per Question</Typography.Title>
         <Table
           dataSource={calculateFastestUsersPerQuestion()}
@@ -397,6 +434,7 @@ const SessionPage = () => {
           rowKey="question"
         />
 
+        {/* Close button */}
         <div style={{ textAlign: "right", marginTop: 16 }}>
           <Button color="danger" variant="filled" onClick={() => setShowResultsModal(false)}>
             Close
