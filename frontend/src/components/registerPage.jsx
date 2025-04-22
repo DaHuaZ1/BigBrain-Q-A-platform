@@ -1,25 +1,41 @@
+// React & Router
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
+// MUI components
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Typography from "@mui/material/Typography";
-import AUTH from "../Constant";
-import { useNavigate } from "react-router-dom";
 import Alert from '@mui/material/Alert';
+
+// Modal from Ant Design
 import { Modal } from 'antd';
+
+// Auth constants (keys for localStorage)
+import AUTH from "../Constant";
+
+// Custom captcha rendering component
 import CanvasCaptcha from './CanvasCaptcha';
 
 const Signup = (props) => {
+  // Form fields
   const [email, setEmail] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [captcha, setCaptcha] = useState("");
-  const [inputCaptcha, setInputCaptcha] = useState("");
-  const navigate = useNavigate()
+
+  // Captcha values
+  const [captcha, setCaptcha] = useState("");            // Generated captcha
+  const [inputCaptcha, setInputCaptcha] = useState("");  // User input
+
+  // Error handling
   const [error, setError] = useState("");
 
+  const navigate = useNavigate();
+
+  // Captcha generator function
   const generateCaptcha = () => {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     let result = "";
@@ -29,11 +45,16 @@ const Signup = (props) => {
     setCaptcha(result);
   };
 
+  // Generate captcha on component mount
   useEffect(() => {
     generateCaptcha();
   }, []);
+
+  // Handle form submission
   const register = (e) => {
     e.preventDefault();
+
+    // Validate password match
     if (password !== confirmPassword) {
       Modal.error({
         title: 'Password Mismatch',
@@ -42,21 +63,21 @@ const Signup = (props) => {
       return;
     }
 
+    // Validate captcha input
     if (inputCaptcha.toUpperCase() !== captcha.toUpperCase()) {
       Modal.error({
         title: 'Invalid Captcha',
         content: 'The captcha you entered is incorrect. Please try again.',
       });
-      generateCaptcha();
+      generateCaptcha(); // Refresh captcha
       return;
     }
-  
+
+    // API call to register
     const url = "http://localhost:5005/admin/auth/register";
     fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         email,
         password,
@@ -66,9 +87,11 @@ const Signup = (props) => {
       .then(async (response) => {
         const data = await response.json();
         if (response.ok && data.token) {
-          localStorage.setItem(AUTH.USER_KEY, email)
+          // Store token and email locally
+          localStorage.setItem(AUTH.USER_KEY, email);
           localStorage.setItem(AUTH.Token_key, data.token);
-          console.log("Token saved successfully!");
+
+          // Set parent token state and redirect
           props.setToken(data.token);
           navigate("/dashboard");
         } else {
@@ -76,11 +99,10 @@ const Signup = (props) => {
         }
       })
       .catch((error) => {
-        console.error("Register error:", error);
-        setError("Network error.");
+        setError("Network error.", error);
       });
   }
-  
+
   return (
     <Container maxWidth="sm" sx={{
       height: '100vh',
@@ -106,12 +128,17 @@ const Signup = (props) => {
           backgroundColor: 'background.paper',
         }}
       >
+        {/* Title */}
         <Typography variant="h5" gutterBottom>
-                    Welcome! Please signup to continue
+          Welcome! Please signup to continue
         </Typography>
+
+        {/* Show error if any */}
         {error && (
           <Alert severity="error">{error}</Alert>
         )}
+
+        {/* Input fields */}
         <TextField
           required
           id="email-register-input"
@@ -139,7 +166,8 @@ const Signup = (props) => {
           type="password"
           onChange={(e) => setConfirmPassword(e.target.value)}
         />
-        {/* Captcha */}
+
+        {/* Captcha input and preview */}
         <Box display="flex" alignItems="center" gap={2}>
           <TextField
             required
@@ -149,11 +177,14 @@ const Signup = (props) => {
           />
           <CanvasCaptcha text={captcha} />
         </Box>
+
+        {/* Submit button */}
         <Button type="submit" variant="contained">
-            Signup Submit
+          Signup Submit
         </Button>
       </Box>
     </Container>
   )
 }
+
 export default Signup;
