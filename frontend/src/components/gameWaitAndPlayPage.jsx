@@ -9,13 +9,23 @@ import {
   Stack,
 } from '@mui/material';
 
+/**
+ * GameWaitAndPlayPage Component
+ * Handles two main states of gameplay:
+ * 1. Waiting room - displays when player joins but game hasn't started
+ * 2. Active gameplay - shows questions and handles answer submission
+ * Includes poll mechanisms to check game status and fetch questions
+ */
 const GameWaitAndPlayPage = () => {
   const navigate = useNavigate();
   const { playerId, sessionId } = useParams();
+  
+  // Game state management
   const [gameStarted, setGameStarted] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activeGame, setActiveGame] = useState(null);
 
+  // Question and answer related states
   const [questionData, setQuestionData] = useState(null);
   const [questionId, setQuestionId] = useState(null);
   const [error] = useState(null);
@@ -26,6 +36,10 @@ const GameWaitAndPlayPage = () => {
 
   const questionType = questionData?.type;
 
+  /**
+   * Polls the backend to check if game has started
+   * Continues polling until game starts or component unmounts
+   */
   useEffect(() => {
     let intervalId = null;
     const checkGameStatus = () => {
@@ -40,8 +54,8 @@ const GameWaitAndPlayPage = () => {
             clearInterval(intervalId);
           }
         })
-        .catch((error) => {
-          console.error('Error checking game status:', error);
+        .catch(() => {
+          // ignore errors here, we just want to keep polling
         })
         .finally(() => {
           setLoading(false);
@@ -53,6 +67,11 @@ const GameWaitAndPlayPage = () => {
     return () => clearInterval(intervalId);
   }, [playerId]);
 
+  /**
+   * Polls for new questions once game has started
+   * Handles question transitions and stores question metadata in localStorage
+   * Redirects to results page when game ends (no more questions)
+   */
   useEffect(() => {
     if (!gameStarted) return;
     const pollInterval = setInterval(async () => {
@@ -65,6 +84,7 @@ const GameWaitAndPlayPage = () => {
         const data = await res.json();
         const newQuestion = data.question;
 
+        // Handle new question received
         if (newQuestion.id !== questionId) {
           setQuestionData(newQuestion);
           setQuestionId(newQuestion.id);
@@ -72,6 +92,8 @@ const GameWaitAndPlayPage = () => {
           setSelectedOptions([]);
           setCorrectAnswers([]);
           setShowAnswer(false);
+          
+          // Store question points and duration for score calculation
           const stored = JSON.parse(localStorage.getItem('questionPoints') || '{}');
           stored[newQuestion.id] = {
             points: newQuestion.points ?? 0,
@@ -79,26 +101,36 @@ const GameWaitAndPlayPage = () => {
           };
           localStorage.setItem('questionPoints', JSON.stringify(stored));
         }
-      } catch (err) {
-        console.error('error:', err.message || err);
+      } catch (_) {
+        // Intentionally ignored: polling may fail due to timeout or network
       }
     }, 1000);
 
     return () => clearInterval(pollInterval);
   }, [gameStarted, playerId, questionId, sessionId, navigate]);
 
+  /**
+   * Sets countdown timer when a new question is loaded
+   */
   useEffect(() => {
     if (questionData?.duration) {
       setCountdown(questionData.duration);
     }
   }, [questionData]);
 
+  /**
+   * Fetches correct answers when countdown reaches zero
+   */
   useEffect(() => {
     if (countdown === 0 && !showAnswer) {
       fetchCorrectAnswers();
     }
   }, [countdown]);
 
+  /**
+   * Manages countdown timer for current question
+   * Decrements timer every second until it reaches zero
+   */
   useEffect(() => {
     if (countdown === null || countdown <= 0) return;
     const timer = setInterval(() => {
@@ -113,6 +145,12 @@ const GameWaitAndPlayPage = () => {
     return () => clearInterval(timer);
   }, [countdown]);
 
+  /**
+   * Transforms various YouTube URL formats to proper embed format
+   * Handles YouTube Shorts, youtu.be links, and standard YouTube URLs
+   * @param {string} url - The media URL to transform
+   * @return {string} - Properly formatted embed URL
+   */
   const transformMediaUrl = (url) => {
     try {
       if (url.includes('youtube.com/shorts/')) {
@@ -127,12 +165,16 @@ const GameWaitAndPlayPage = () => {
         const id = urlObj.searchParams.get('v');
         if (id) return `https://www.youtube.com/embed/${id}`;
       }
-    } catch (err) {
-      console.error("Invalid media URL", err);
+    } catch (_) {
+      // Ignore errors in URL parsing
     }
     return url;
   };
 
+  /**
+   * Submits player's answer to the backend
+   * @param {Array} options - Array of selected answer indices
+   */
   const submitAnswer = async (options) => {
     const body = JSON.stringify({ answers: options });
     try {
@@ -143,18 +185,24 @@ const GameWaitAndPlayPage = () => {
       });
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('error:', errorText);
-        throw new Error('Failed to submit answer');
+        throw new Error('Failed to submit answer', errorText);
       }
-      console.log('Answer submitted:', options);
-    } catch (err) {
-      console.error('error:', err);
+    } catch (_) {
+      // ignore errors in answer submission
     }
   };
 
+  /**
+   * Handles option selection based on question type
+   * For single/judgement questions: allows only one selection
+   * For multiple choice: allows multiple selections
+   * @param {number} index - Index of the selected option
+   */
   const handleOptionClick = (index) => {
     if (!questionType || countdown === 0) return;
     let newSelection = [];
+    
+    // Handle different question types
     if (questionType === 'single' || questionType === 'judgement') {
       newSelection = selectedOptions[0] === index ? [] : [index];
     } else if (questionType === 'multiple') {
@@ -162,18 +210,23 @@ const GameWaitAndPlayPage = () => {
         ? selectedOptions.filter(i => i !== index)
         : [...selectedOptions, index];
     }
+    
     setSelectedOptions(newSelection);
     submitAnswer(newSelection);
   };
 
+  /**
+   * Fetches correct answers for the current question from backend
+   * Called when question timer reaches zero
+   */
   const fetchCorrectAnswers = async () => {
     try {
       const res = await fetch(`http://localhost:5005/play/${playerId}/answer`);
       const data = await res.json();
       setCorrectAnswers(data.answers);
       setShowAnswer(true);
-    } catch (err) {
-      console.error('Failed to fetch correct answers:', err);
+    } catch (_) {
+      // ignore errors in fetching correct answers
     }
   };
 
@@ -183,18 +236,21 @@ const GameWaitAndPlayPage = () => {
 
   return (
     <div>
+      {/* Game play interface - shown when game has started */}
       {gameStarted ? (
         <Container maxWidth="sm" sx={{ p: 2 }}>
           <Typography variant="h4" gutterBottom align="center">
             GamePlayPage
           </Typography>
 
+          {/* Error display */}
           {error && (
             <Typography color="error" align="center">
               {error}
             </Typography>
           )}
 
+          {/* Question display section */}
           {questionData && (
             <Stack spacing={2} mt={2}>
               <Typography variant="h6" align="center">
@@ -209,6 +265,7 @@ const GameWaitAndPlayPage = () => {
                 Timer: {questionData.duration ?? 0} seconds
               </Typography>
 
+              {/* Countdown timer - turns red when less than 3 seconds remain */}
               <Typography
                 variant="h6"
                 align="center"
@@ -217,6 +274,7 @@ const GameWaitAndPlayPage = () => {
                 ⏳ {countdown} seconds
               </Typography>
 
+              {/* Media display for URL type (YouTube videos, etc.) */}
               {questionData.mediaMode === 'url' && questionData.media && (
                 <Box sx={{ display: 'flex', justifyContent: 'center' }}>
                   <iframe
@@ -229,6 +287,7 @@ const GameWaitAndPlayPage = () => {
                 </Box>
               )}
 
+              {/* Image display for uploaded images */}
               {questionData.mediaMode === 'image' && questionData.imageData && (
                 <Box sx={{ display: 'flex', justifyContent: 'center', my: 2 }}>
                   <img
@@ -245,6 +304,7 @@ const GameWaitAndPlayPage = () => {
                 </Box>
               )}
 
+              {/* Answer options - styling changes based on selection state and after showing answers */}
               <Stack spacing={1}>
                 {questionData.optionAnswers.map((option, index) => (
                   <Button
@@ -288,6 +348,7 @@ const GameWaitAndPlayPage = () => {
           )}
         </Container>
       ) : (
+        // Waiting room - shown before game starts
         <Box sx={{ textAlign: 'center', mt: 4 }}>
           <Typography variant="h5" gutterBottom>
             Waiting for the administrator to start the game...
@@ -297,6 +358,7 @@ const GameWaitAndPlayPage = () => {
             Bored? try a quick game while you wait!
           </Typography>
 
+          {/* Mini-game control buttons */}
           <Box sx={{ display: 'flex', justifyContent: 'center', gap: 2, mt: 2 }}>
             <Button variant="contained" onClick={() => setActiveGame('snake')}>
               Try Snake
@@ -306,6 +368,7 @@ const GameWaitAndPlayPage = () => {
             </Button>
           </Box>
 
+          {/* Snake mini-game container */}
           <Box sx={{ mt: 4 }}>
             {activeGame === 'snake' && (
               <Box sx={{ maxWidth: 400, margin: 'auto' }}>
