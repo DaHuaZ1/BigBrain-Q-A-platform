@@ -15,6 +15,7 @@ import Modal from "@mui/material/Modal";
 import Backdrop from "@mui/material/Backdrop";
 import Fade from "@mui/material/Fade";
 
+// Modal styling
 const style = {
   position: 'absolute',
   top: '50%',
@@ -27,19 +28,23 @@ const style = {
   p: 4,
 };
 
+// SingleGame component - handles editing of a single game's info and questions
 const SingleGame = () => {
-  const { game_id } = useParams();
-  const [name, setName] = useState("");
-  const [thumbnail, setThumbnail] = useState("");
-  const [tab, setTab] = useState(0);
+  const { game_id } = useParams(); // Get the game ID from the URL
+  const [name, setName] = useState(""); // Game name state
+  const [thumbnail, setThumbnail] = useState(""); // Game thumbnail state
+  const [tab, setTab] = useState(0); // Current active tab (0: Game Info, 1: Questions)
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false); // Modal open state
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const [questionTitle, setQuestionTitle] = useState([]);
-  const [questions, setQuestions] = useState([]);
-  const [game, setGame] = useState(null);
 
+  const [questionTitle, setQuestionTitle] = useState([]); // New question title input
+  const [questions, setQuestions] = useState([]); // Current game's questions
+  const [game, setGame] = useState(null); // Full game object
+
+  // Fetch and load game data on mount or when questions/game updates
   useEffect(() => {
     fetchAllGames()
       .then((data) => {
@@ -52,8 +57,9 @@ const SingleGame = () => {
         }
       })
       .catch((error) => console.error("Error fetching games:", error));
-  }, [game,questions]);
+  }, [game, questions]); // Re-fetch when game or questions change
 
+  // Update game info (name and thumbnail)
   const updateGame = () => {
     fetchAllGames()
       .then((data) => {
@@ -70,18 +76,23 @@ const SingleGame = () => {
       .catch((error) => console.error("Error updating game:", error));
   };
 
+  // Handle tab switching
   const handleTabChange = (event, newValue) => {
     setTab(newValue);
   };
 
+  // Add a new question to the current game
   const postNewQuestion = () => {
     fetchAllGames()
       .then((data) => {
         const oldGame = Array.isArray(data.games) ? data.games : [];
         const foundGame = oldGame.find((game) => game.id === parseInt(game_id));
         const existingQuestions = foundGame.questions || [];
+
+        // Find next available question ID
         const maxId = existingQuestions.reduce((max, q) => Math.max(max, q.id || 0), 0);
 
+        // Create new question object
         const newQuestion = {
           question: questionTitle,
           duration: 0,
@@ -93,10 +104,13 @@ const SingleGame = () => {
           id: maxId + 1,
         };
 
+        // Append new question to existing ones
         const updatedQuestions = {
           ...foundGame,
-          questions:[...existingQuestions,newQuestion]};
+          questions: [...existingQuestions, newQuestion]
+        };
 
+        // Replace old game with updated one
         const updatedGame = oldGame.map((game) =>
           game.id === parseInt(game_id) ? updatedQuestions : game
         );
@@ -109,10 +123,12 @@ const SingleGame = () => {
       })
   };
 
+  // Show loading if game data is not ready yet
   if (!game) {
     return <div>Loading...</div>;
   }
 
+  // Delete a question from the current game
   const deleteQuestion = (questionId) => {
     fetchAllGames()
       .then((data) => {
@@ -136,6 +152,7 @@ const SingleGame = () => {
       alignItems: 'center',
       justifyContent: 'center',
     }}>
+      {/* Main card box */}
       <Box
         sx={{
           width: '100%',
@@ -147,11 +164,14 @@ const SingleGame = () => {
         }}
       >
         <Typography variant="h5">Edit Game:{game.name}</Typography>
+        
+        {/* Tab navigation */}
         <Tabs value={tab} onChange={handleTabChange} centered>
           <Tab label="Game Info" />
           <Tab label="Questions" />
         </Tabs>
 
+        {/* Game Info Tab */}
         {tab === 0 && (
           <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
             <TextField
@@ -171,9 +191,11 @@ const SingleGame = () => {
           </Box>
         )}
 
+        {/* Questions Tab */}
         {tab === 1 && (
           <Box sx={{ mt: 2 }}>
             <Box sx={{ mt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              {/* List of existing questions */}
               {questions.map((question) => (
                 <React.Fragment key={question.id}>
                   <Typography variant="h6">Question: {question.id}</Typography>
@@ -187,20 +209,26 @@ const SingleGame = () => {
                 </React.Fragment>
               ))}
             </Box>
+
+            {/* Message for empty question list */}
             {questions.length === 0 && (
               <Typography variant="body2" sx={{ mt: 2, color: 'text.secondary' }}>
-                            No questions available. Please add a question.
+                No questions available. Please add a question.
               </Typography>
             )}
+
+            {/* Buttons for adding question and navigating back */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 2 }}>
               <Button variant="contained" onClick={handleOpen}>
-                        Add New Question
+                Add New Question
               </Button>
               <Button variant="contained" color="error" onClick={() => navigate("/dashboard")}>back</Button>
             </Box>
           </Box>
         )}
       </Box>
+
+      {/* Modal for adding new question */}
       <Modal
         aria-labelledby="transition-modal-title"
         aria-describedby="transition-modal-description"
@@ -221,7 +249,7 @@ const SingleGame = () => {
               fontWeight: "bold",
               marginBottom: "20px",
             }}>
-                        Add New Question
+              Add New Question
             </Typography>
             <TextField
               sx={{width: "100%"}}
@@ -251,7 +279,7 @@ const SingleGame = () => {
               variant="contained" 
               onClick={postNewQuestion}
             >
-                        submit
+              submit
             </Button>
           </Box>
         </Fade>
