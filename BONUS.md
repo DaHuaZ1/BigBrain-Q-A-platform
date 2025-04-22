@@ -53,3 +53,11 @@
 ### ⬆️ Scroll-to-Top Button
 - A floating button appears in the bottom-right corner after scrolling down.
 - Smoothly scrolls the page back to the top when clicked.
+
+### ⏰ Time-based Greeting on Home Page
+- The Home Page now displays a dynamic greeting based on the user's local time.
+- Morning (before 12pm): "Good Morning, Commander!"
+- Afternoon (12pm–6pm): "Good Afternoon, Commander!"
+- Evening (after 6pm): "Good Evening, Commander!"
+- Implemented using JavaScript `Date` API and rendered using `Typography` component.
+- Ensures the greeting remains visible even after rerenders by storing it in `localStorage`.
