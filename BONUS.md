@@ -61,3 +61,10 @@
 - Evening (after 6pm): "Good Evening, Commander!"
 - Implemented using JavaScript `Date` API and rendered using `Typography` component.
 - Ensures the greeting remains visible even after rerenders by storing it in `localStorage`.
+
+### 🔍 Game Search with Styled Input
+- A live search feature is added to the Dashboard to help users find games by name.
+- As users type in the search box, the displayed GameCards are filtered in real time.
+- The search input is styled as a sleek, pill-shaped (rounded) bar with a search icon prefix.
+- Implemented using `TextField` with `InputAdornment` and custom `sx` styles from MUI.
+- The UI blends seamlessly into the dashboard layout while improving usability and aesthetics.
