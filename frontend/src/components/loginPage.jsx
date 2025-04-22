@@ -1,23 +1,39 @@
-import { useState } from "react";
+// React & Router
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+
+// MUI components
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
 import Typography from "@mui/material/Typography";
-import AUTH from "../Constant";
-import { useNavigate } from "react-router-dom";
 import Alert from '@mui/material/Alert';
+
+// Ant Design Modal
 import { Modal } from 'antd';
-import { useEffect } from "react";
+
+// Auth constant (stores localStorage keys)
+import AUTH from "../Constant";
+
+// Custom component for rendering captcha image
 import CanvasCaptcha from './CanvasCaptcha'; 
 
 const Login = (props) => {
+  // Form state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("")
-  const [captcha, setCaptcha] = useState("");
-  const [inputCaptcha, setInputCaptcha] = useState("");
-  const navigate = useNavigate()
+
+  // Error state for display
+  const [error, setError] = useState("");
+
+  // Captcha logic
+  const [captcha, setCaptcha] = useState("");             // Correct captcha
+  const [inputCaptcha, setInputCaptcha] = useState("");   // User input captcha
+
+  const navigate = useNavigate();
+
+  // Function to randomly generate a 4-character captcha
   const generateCaptcha = () => {
     const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     let result = "";
@@ -25,49 +41,61 @@ const Login = (props) => {
       result += chars[Math.floor(Math.random() * chars.length)];
     }
     setCaptcha(result);
-  };  
+  };
+
+  // Generate captcha on initial mount
   useEffect(() => {
     generateCaptcha();
   }, []);
+
+  // Login handler
   const signin = async (e) => {
-    e.preventDefault(); 
-    const url = "http://localhost:5005/admin/auth/login"
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        email,
-        password
-      })
-    })
+    e.preventDefault(); // Prevent default form submission
+
+    const url = "http://localhost:5005/admin/auth/login";
+
+    // Captcha validation first
     if (inputCaptcha.toUpperCase() !== captcha.toUpperCase()) {
       Modal.error({
         title: 'Invalid Captcha',
         content: 'The captcha you entered is incorrect. Please try again.',
       });
-      generateCaptcha();
+      generateCaptcha(); // Regenerate on failure
       return;
     }
-    const data = await response.json()
+
+    // Make POST request with email and password
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await response.json();
+
+    // If login successful, save token and email
     if (data.token) {
-      localStorage.setItem(AUTH.USER_KEY, email)
-      localStorage.setItem(AUTH.Token_key, data.token)
-      console.log("token saved")
-      props.setToken(data.token)
-      navigate("/dashboard")
-    }else{
-      setError(data.error || "Legendary Secret Key Login Failed")
+      localStorage.setItem(AUTH.USER_KEY, email);
+      localStorage.setItem(AUTH.Token_key, data.token);
+      props.setToken(data.token); // Set parent state
+      navigate("/dashboard");     // Redirect to dashboard
+    } else {
+      // Show error from backend or generic message
+      setError(data.error || "Legendary Secret Key Login Failed");
     }
-  }
+  };
+
   return (
-    <Container maxWidth="sm" sx={{
-      height: '100vh',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-    }}>
+    <Container
+      maxWidth="sm"
+      sx={{
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      {/* Form box */}
       <Box
         component="form"
         onSubmit={signin}
@@ -82,15 +110,19 @@ const Login = (props) => {
           flexDirection: 'column',
           gap: 2,
           backgroundColor: 'background.paper',
-          minHeight: 'auto',
         }}
       >
+        {/* Title */}
         <Typography variant="h5" gutterBottom>
-                    Welcome! Please login to continue
+          Welcome! Please login to continue
         </Typography>
-        {error &&(
+
+        {/* Error alert */}
+        {error && (
           <Alert severity="error">{error}</Alert>
         )}
+
+        {/* Email input */}
         <TextField
           required
           label="Email"
@@ -100,6 +132,8 @@ const Login = (props) => {
           onChange={(e) => setEmail(e.target.value)}
           variant="outlined"
         />
+
+        {/* Password input */}
         <TextField
           required
           label="Password"
@@ -109,7 +143,8 @@ const Login = (props) => {
           fullWidth
           variant="outlined"
         />
-        {/* Captcha */}
+
+        {/* Captcha input and image */}
         <Box display="flex" alignItems="center" gap={2}>
           <TextField
             required
@@ -119,11 +154,14 @@ const Login = (props) => {
           />
           <CanvasCaptcha text={captcha} />
         </Box>
+
+        {/* Submit button */}
         <Button type="submit" variant="contained">
-                    Login Submit
+          Login Submit
         </Button>
       </Box>
     </Container>
-  )
-}
+  );
+};
+
 export default Login;
