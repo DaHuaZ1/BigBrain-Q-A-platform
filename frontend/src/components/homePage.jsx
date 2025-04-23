@@ -92,7 +92,7 @@ const Home = (props) => {
     if (!greeting || !tip) {
       const hour = new Date().getHours();
       const greet = hour < 12 ? 'Good Morning, Commander!' :
-        hour < 18 ? 'Good Afternoon, Commander!' :
+        hour < 19 ? 'Good Afternoon, Commander!' :
           'Good Evening, Commander!';
       const randomTip = tips[Math.floor(Math.random() * tips.length)];
       localStorage.setItem('greeting', greet);
