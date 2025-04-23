@@ -32,8 +32,6 @@ const GameJoinPage = () => {
       setError('Session ID is required.');
     } else {
       setError('');
-      console.log('Session ID:', sessionId);
-      console.log('Name:', name);
       // Jump to gameWaitAndPlayPage
       fetch(`http://localhost:5005/play/join/${sessionId}`, {
         method: 'POST',
@@ -45,13 +43,14 @@ const GameJoinPage = () => {
         .then((res) => {
           if (!res.ok) {
             return res.json().then((data) => {
-              throw new Error(data.error || 'Failed to join the session.');
+              const errorMessage = data.error || 'Failed to join the session.';
+              setError(errorMessage);
+              throw new Error(errorMessage);
             });
           }
           return res.json();
         })
         .then((data) => {
-          console.log('Join API response:', data);
           const playerId = data.playerId;
           navigate(`/play/session/${sessionId}/player/${playerId}/game`);
         })
@@ -100,6 +99,7 @@ const GameJoinPage = () => {
           value={name}
           onChange={(e) => setName(e.target.value)}
           fullWidth
+          data-testid="playerNameInput"
         />
 
         <Button
@@ -107,6 +107,7 @@ const GameJoinPage = () => {
           color="primary"
           onClick={handleStartGame}
           sx={{ minWidth: '200px' }}
+          data-testid="startGameButton"
         >
         Start Game
         </Button>
