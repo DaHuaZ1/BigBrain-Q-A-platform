@@ -190,6 +190,7 @@ const GameCard = (props) => {
       {props.onAddGameClick && (
         <Grid key="add-new" size={{xs:12,sm:6,md:3}}>
           <Card
+            data-testid="add-game-card"
             onClick={props.onAddGameClick}
             sx={{
               width: "100%",
@@ -263,6 +264,7 @@ const GameCard = (props) => {
                       size="small"
                       onClick={() => setStopDialog({ open: true, game })}
                       sx={{ position: "absolute", top: 8, right: 8, zIndex: 2, boxShadow: 3 }}
+                      data-testid="end-game-btn"
                     >
                       <StopIcon />
                     </Fab>
@@ -275,6 +277,7 @@ const GameCard = (props) => {
                     size="small"
                     onClick={() => handleStartSession(game)}
                     sx={{ position: "absolute", top: 8, right: 8, zIndex: 2, boxShadow: 3 }}
+                    data-testid="start-game-btn"
                   >
                     <PlayArrowIcon />
                   </Fab>
@@ -347,7 +350,7 @@ const GameCard = (props) => {
         <DialogTitle>Stop Game Session</DialogTitle>
         <DialogActions sx={{ justifyContent: "space-between", padding: "16px" }}>
           <Button onClick={() => setStopDialog({ open: false, game: null })}>Cancel</Button>
-          <Button color="error" onClick={() => {
+          <Button color="error" data-testid="stop-confirm" onClick={() => {
             handleStopSession(stopDialog.game);
             setStopDialog({ open: false, game: null });
           }}>
@@ -364,7 +367,7 @@ const GameCard = (props) => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setResultDialog({ open: false, sessionId: null })}>No</Button>
-          <Button color="primary" onClick={() => {
+          <Button color="primary" data-testid="show-result" onClick={() => {
             navigate(`/game/${resultDialog.game.id}/session/${resultDialog.game.active}`);
             setResultDialog({ open: false, sessionId: null });
           }}>Yes, show results</Button>
