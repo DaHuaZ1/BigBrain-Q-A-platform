@@ -328,7 +328,7 @@ const SessionPage = () => {
             }}>
               Maybe later
             </Button>
-            <Button key="ok" color="cyan" variant="solid" onClick={fetchResults}>
+            <Button data-testid="sure-for-result" key="ok" color="cyan" variant="solid" onClick={fetchResults}>
               Sure
             </Button>
           </div>
@@ -436,7 +436,7 @@ const SessionPage = () => {
 
         {/* Close button */}
         <div style={{ textAlign: "right", marginTop: 16 }}>
-          <Button color="danger" variant="filled" onClick={() => setShowResultsModal(false)}>
+          <Button data-testid="close-result" color="danger" variant="filled" onClick={() => setShowResultsModal(false)}>
             Close
           </Button>
         </div>
