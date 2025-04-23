@@ -54,8 +54,10 @@ const Login = (props) => {
 
     const url = "http://localhost:5005/admin/auth/login";
 
+    // UI testing bypass for captcha
+    const isBypassCaptcha = import.meta.env.MODE === 'development' && inputCaptcha.toUpperCase() === 'AAAA';
     // Captcha validation first
-    if (inputCaptcha.toUpperCase() !== captcha.toUpperCase()) {
+    if (inputCaptcha.toUpperCase() !== captcha.toUpperCase() && !isBypassCaptcha) {
       Modal.error({
         title: 'Invalid Captcha',
         content: 'The captcha you entered is incorrect. Please try again.',
@@ -131,6 +133,7 @@ const Login = (props) => {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           variant="outlined"
+          id="email-login-input"
         />
 
         {/* Password input */}
@@ -142,6 +145,7 @@ const Login = (props) => {
           onChange={(e) => setPassword(e.target.value)}
           fullWidth
           variant="outlined"
+          id="password-login-input"
         />
 
         {/* Captcha input and image */}

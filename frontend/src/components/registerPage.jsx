@@ -63,8 +63,10 @@ const Signup = (props) => {
       return;
     }
 
+    // UI testing bypass for captcha
+    const isBypassCaptcha = import.meta.env.MODE === 'development' && inputCaptcha.toUpperCase() === 'AAAA';
     // Validate captcha input
-    if (inputCaptcha.toUpperCase() !== captcha.toUpperCase()) {
+    if (inputCaptcha.toUpperCase() !== captcha.toUpperCase() && !isBypassCaptcha) {
       Modal.error({
         title: 'Invalid Captcha',
         content: 'The captcha you entered is incorrect. Please try again.',
