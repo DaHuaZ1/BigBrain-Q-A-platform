@@ -89,6 +89,8 @@ const Bar = (props) => {
     localStorage.removeItem('token');
     localStorage.removeItem('email');
     localStorage.removeItem('questionPoints');
+    localStorage.removeItem('tip');
+    localStorage.removeItem('greeting');
     navigate('/');
   };
 
