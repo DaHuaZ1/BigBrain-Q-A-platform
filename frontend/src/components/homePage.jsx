@@ -83,8 +83,8 @@ const Home = (props) => {
   const navigate = useNavigate();
 
   // Greeting and tip fetched from localStorage or set on first visit
-  const [tip, setTip] = useState(localStorage.getItem('tip') || '');
-  const [greeting, setGreeting] = useState(localStorage.getItem('greeting') || '');
+  const [tip, setTip] = useState('');
+  const [greeting, setGreeting] = useState('');
   const [theme, setTheme] = useState('light'); // theme based on time of day
 
   useEffect(() => {
@@ -95,8 +95,6 @@ const Home = (props) => {
         hour < 19 ? 'Good Afternoon, Commander!' :
           'Good Evening, Commander!';
       const randomTip = tips[Math.floor(Math.random() * tips.length)];
-      localStorage.setItem('greeting', greet);
-      localStorage.setItem('tip', randomTip);
       setGreeting(greet);
       setTip(randomTip);
     }
