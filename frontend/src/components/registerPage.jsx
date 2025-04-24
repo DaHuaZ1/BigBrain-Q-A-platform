@@ -18,6 +18,7 @@ import AUTH from "../Constant";
 
 // Custom captcha rendering component
 import CanvasCaptcha from './CanvasCaptcha';
+import backendURL from '../backendURL'; // Import backend URL
 
 const Signup = (props) => {
   // Form fields
@@ -76,7 +77,7 @@ const Signup = (props) => {
     }
 
     // API call to register
-    const url = "http://localhost:5005/admin/auth/register";
+    const url = `${backendURL}/admin/auth/register`;
     fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },

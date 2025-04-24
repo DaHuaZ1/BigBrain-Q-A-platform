@@ -9,6 +9,7 @@ import {
   Paper,
   Button
 } from '@mui/material';
+import backendURL from '../backendURL';
 
 /**
  * GamePlayerResultPage Component
@@ -40,7 +41,7 @@ const GamePlayerResultPage = () => {
     const fetchResults = async () => {
       try {
         // Fetch basic results data from backend
-        const res = await fetch(`http://localhost:5005/play/${playerId}/results`);
+        const res = await fetch(`${backendURL}/play/${playerId}/results`);
         const data = await res.json();
 
         // Retrieve locally stored question points information

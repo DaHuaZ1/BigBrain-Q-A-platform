@@ -1,5 +1,6 @@
 // Import AUTH constants (e.g., token key)
 import AUTH from "./Constant";
+import backendURL from "./backendURL"; // Import backend URL
 
 // Handle API response errors
 const handleError = (res) => {
@@ -17,7 +18,7 @@ export const fetchAllGames = () => {
   const userToken = localStorage.getItem(AUTH.Token_key);
 
   // Make a GET request to the admin games endpoint
-  return fetch("http://localhost:5005/admin/games", {
+  return fetch(`${backendURL}/admin/games`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json; charset=UTF-8", // Inform server we're sending JSON

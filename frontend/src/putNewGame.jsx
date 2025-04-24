@@ -1,5 +1,7 @@
 // Import constant keys for localStorage token access
 import AUTH from "./Constant";
+// Import backend URL for API requests
+import backendURL from "./backendURL"; // Import backend URL
 
 // Handle errors returned from the backend response
 const handleError = (res) => {
@@ -17,7 +19,7 @@ export const putNewGame = (games) => {
   const userToken = localStorage.getItem(AUTH.Token_key);
 
   // Send PUT request to update the full list of games
-  return fetch("http://localhost:5005/admin/games", {
+  return fetch(`${backendURL}/admin/games`, {
     method: "PUT", // HTTP method for replacing existing data
     headers: {
       "Content-Type": "application/json; charset=UTF-8", // Specify JSON payload

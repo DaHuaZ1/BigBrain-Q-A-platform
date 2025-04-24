@@ -8,6 +8,7 @@ import {
   Container,
   Stack,
 } from '@mui/material';
+import backendURL from '../backendURL';
 
 /**
  * GameWaitAndPlayPage Component
@@ -43,7 +44,7 @@ const GameWaitAndPlayPage = () => {
   useEffect(() => {
     let intervalId = null;
     const checkGameStatus = () => {
-      fetch(`http://localhost:5005/play/${playerId}/status`)
+      fetch(`${backendURL}/play/${playerId}/status`)
         .then((res) => {
           if (!res.ok) throw new Error('Failed to fetch status');
           return res.json();
@@ -76,7 +77,7 @@ const GameWaitAndPlayPage = () => {
     if (!gameStarted) return;
     const pollInterval = setInterval(async () => {
       try {
-        const res = await fetch(`http://localhost:5005/play/${playerId}/question`);
+        const res = await fetch(`${backendURL}/play/${playerId}/question`);
         if (!res.ok) {
           navigate(`/play/session/${sessionId}/player/${playerId}/result`);
           return;
@@ -178,7 +179,7 @@ const GameWaitAndPlayPage = () => {
   const submitAnswer = async (options) => {
     const body = JSON.stringify({ answers: options });
     try {
-      const response = await fetch(`http://localhost:5005/play/${playerId}/answer`, {
+      const response = await fetch(`${backendURL}/play/${playerId}/answer`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body,
@@ -221,7 +222,7 @@ const GameWaitAndPlayPage = () => {
    */
   const fetchCorrectAnswers = async () => {
     try {
-      const res = await fetch(`http://localhost:5005/play/${playerId}/answer`);
+      const res = await fetch(`${backendURL}/play/${playerId}/answer`);
       const data = await res.json();
       setCorrectAnswers(data.answers);
       setShowAnswer(true);

@@ -18,6 +18,7 @@ import AUTH from "../Constant";
 
 // Custom component for rendering captcha image
 import CanvasCaptcha from './CanvasCaptcha'; 
+import backendURL from '../backendURL'; // Import backend URL
 
 const Login = (props) => {
   // Form state
@@ -52,7 +53,7 @@ const Login = (props) => {
   const signin = async (e) => {
     e.preventDefault(); // Prevent default form submission
 
-    const url = "http://localhost:5005/admin/auth/login";
+    const url = `${backendURL}/admin/auth/login`;
 
     // UI testing bypass for captcha
     const isBypassCaptcha = import.meta.env.MODE === 'development' && inputCaptcha.toUpperCase() === 'AAAA';

@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Container, TextField, Button, Typography } from '@mui/material'; 
 import { useParams, useNavigate } from 'react-router-dom';
 import Alert from '@mui/material/Alert';
+import backendURL from '../backendURL';
 
 
 //Main
@@ -33,7 +34,7 @@ const GameJoinPage = () => {
     } else {
       setError('');
       // Jump to gameWaitAndPlayPage
-      fetch(`http://localhost:5005/play/join/${sessionId}`, {
+      fetch(`${backendURL}/play/join/${sessionId}`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -1,5 +1,7 @@
 // Import constants used for accessing localStorage keys
 import AUTH from "./Constant";
+// Import backend URL for API requests
+import backendURL from "./backendURL"; // Import backend URL
 
 // Helper function to retrieve token from localStorage
 const userToken = () => localStorage.getItem(AUTH.Token_key);
@@ -17,7 +19,7 @@ const handleResponse = async (res) => {
 
 // Sends a POST request to mutate a game session (e.g., start or advance game)
 export const MutateGameSession = (gameId, mutationType) => {
-  return fetch(`http://localhost:5005/admin/game/${gameId}/mutate`, {
+  return fetch(`${backendURL}/admin/game/${gameId}/mutate`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json", // Inform server of JSON payload
@@ -29,7 +31,7 @@ export const MutateGameSession = (gameId, mutationType) => {
 
 // Fetch the current status of a game session (e.g., active, waiting)
 export const FetchGameStatus = (sessionId) => {
-  return fetch(`http://localhost:5005/admin/session/${sessionId}/status`, {
+  return fetch(`${backendURL}/admin/session/${sessionId}/status`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -40,7 +42,7 @@ export const FetchGameStatus = (sessionId) => {
 
 // Fetch results for a completed game session
 export const FetchGameResults = (sessionId) => {
-  return fetch(`http://localhost:5005/admin/session/${sessionId}/results`, {
+  return fetch(`${backendURL}/admin/session/${sessionId}/results`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
