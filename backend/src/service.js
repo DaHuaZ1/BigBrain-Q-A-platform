@@ -42,14 +42,19 @@ export const reset = () => {
   sessions = {};
 };
 
-try {
-  admins = (await redis.get('admins')) || {};
-  games = (await redis.get('games')) || {};
-  sessions = (await redis.get('sessions')) || {};
-} catch (err) {
-  console.log("WARNING: Redis unavailable or empty, initializing new state");
-  await save();
-}
+const initRedisData = async () => {
+  try {
+    admins = (await redis.get('admins')) || {};
+    games = (await redis.get('games')) || {};
+    sessions = (await redis.get('sessions')) || {};
+  } catch (err) {
+    console.log("WARNING: Redis unavailable or empty, initializing new state");
+    await save();
+  }
+};
+
+initRedisData();
+
 
 /***************************************************************
                       Helper Functions
