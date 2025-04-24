@@ -53,7 +53,9 @@ const initRedisData = async () => {
   }
 };
 
-initRedisData();
+initRedisData().catch(err => {
+  console.error("Redis init failed:", err);
+});
 
 
 /***************************************************************
