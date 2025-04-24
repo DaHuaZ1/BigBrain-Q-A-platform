@@ -1,12 +1,16 @@
 import AsyncLock from "async-lock";
-import fs from "fs";
 import jwt from "jsonwebtoken";
 import { AccessError, InputError } from "./error";
+import { Redis } from '@upstash/redis';
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN,
+});
 
 const lock = new AsyncLock();
 
 const JWT_SECRET = "llamallamaduck";
-const DATABASE_FILE = "./database.json";
 
 /***************************************************************
                       State Management
@@ -19,26 +23,15 @@ let sessions = {};
 const sessionTimeouts = {};
 
 const update = (admins, games, sessions) =>
-  new Promise((resolve, reject) => {
-    lock.acquire("saveData", () => {
-      try {
-        fs.writeFileSync(
-          DATABASE_FILE,
-          JSON.stringify(
-            {
-              admins,
-              games,
-              sessions,
-            },
-            null,
-            2
-          )
-        );
-        resolve();
-      } catch {
-        reject(new Error("Writing to database failed"));
-      }
-    });
+  new Promise(async (resolve, reject) => {
+    try {
+      await redis.set('admins', admins);
+      await redis.set('games', games);
+      await redis.set('sessions', sessions);
+      resolve();
+    } catch (err) {
+      reject(new Error('Writing to Redis failed'));
+    }
   });
 
 export const save = () => update(admins, games, sessions);
@@ -50,13 +43,12 @@ export const reset = () => {
 };
 
 try {
-  const data = JSON.parse(fs.readFileSync(DATABASE_FILE));
-  admins = data.admins;
-  games = data.games;
-  sessions = data.sessions;
-} catch {
-  console.log("WARNING: No database found, create a new one");
-  save();
+  admins = (await redis.get('admins')) || {};
+  games = (await redis.get('games')) || {};
+  sessions = (await redis.get('sessions')) || {};
+} catch (err) {
+  console.log("WARNING: Redis unavailable or empty, initializing new state");
+  await save();
 }
 
 /***************************************************************
