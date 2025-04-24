@@ -68,3 +68,7 @@
 - The search input is styled as a sleek, pill-shaped (rounded) bar with a search icon prefix.
 - Implemented using `TextField` with `InputAdornment` and custom `sx` styles from MUI.
 - The UI blends seamlessly into the dashboard layout while improving usability and aesthetics.
+
+## The backend was successfully deployed
+
+### backend url: https://z5542095-bigbrain-deploy-backend.vercel.app
