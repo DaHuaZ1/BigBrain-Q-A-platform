@@ -1,2 +1,2 @@
-const backendURL = 'https://z5542095-bigbrain-deploy-backend.vercel.app';
+const backendURL = 'http://localhost:5005';
 export default backendURL;
