@@ -72,3 +72,6 @@
 ## The backend was successfully deployed
 
 ### backend url: https://z5542095-bigbrain-deploy-backend.vercel.app
+- I have already connected the frontend with the deployed backend.
+- I placed the url of backend in the `backendURL.js` file located at `frontend/src`.
+- If the marking use local backend, please change the URL of this file to `http://localhost:5005`.
