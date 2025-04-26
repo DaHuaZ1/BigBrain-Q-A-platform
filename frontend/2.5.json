@@ -1,0 +1,47 @@
+{
+  "name": "Basic Math & Logic Quiz",
+  "thumbnail": "https://www.unsw.edu.au/content/unsw-sites/au/en/_jcr_content/root/responsivegrid-layout-fixed-width/responsivegrid-full-top/column_layout_copy_c/par_2_1_50/image.coreimg.82.1170.jpeg/1739854178131/2024-10-21-strategy-expo-0003.jpeg",
+  "questions": [
+    {
+      "question": "What is 2 + 2?",
+      "duration": 30,
+      "points": 10,
+      "type": "single",
+      "optionAnswers": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "correctAnswers": [
+        3
+      ],
+      "media": "",
+      "mediaMode": "url",
+      "imageUploaded": false,
+      "imageData": "",
+      "id": 1
+    },
+    {
+      "question": "Which of the following are fruits?",
+      "duration": 45,
+      "points": 15,
+      "type": "multiple",
+      "optionAnswers": [
+        "Apple",
+        "Carrot",
+        "Banana",
+        "Potato"
+      ],
+      "correctAnswers": [
+        0,
+        2
+      ],
+      "media": "",
+      "mediaMode": "url",
+      "imageUploaded": false,
+      "imageData": "",
+      "id": 2
+    }
+  ]
+}
