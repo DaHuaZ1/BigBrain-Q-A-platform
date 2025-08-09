@@ -1,5 +1,3 @@
-# BONUS Features (Implemented by Yuxin)
-
 ## CAPTCHA on Login & Register
 - When users register or log in, a visual CAPTCHA (e.g. "P5VZ") 
 - The CAPTCHA includes distortion to make recognition harder for machines.
@@ -10,9 +8,6 @@
 - When players wait for the admin to start the game, they're shown a waiting screen.
 - I added a simple Snake game ("Try Snake!") by using canvas to improve the waiting experience.
 - The game logic references [YouTube tutorial](https://www.youtube.com/watch?v=Je0B3nHhKmM) and was rewritten to fit the project requirements.
-
-
-# BONUS Features (Implemented by Mingxuan)
 
 ## User Ranking & Visual Enhancements
 
@@ -73,4 +68,5 @@
 
 ### backend url: https://z5542095-bigbrain-deploy-backend.vercel.app
 - If need to use it, please modify `backendURL.js` of `frontend/src`. 
+
 - Change `http://localhost:5005` to `https://z5542095-bigbrain-deploy-backend.vercel.app`.
